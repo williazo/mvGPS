@@ -1,0 +1,22 @@
+Package: mvGPS
+Title: Causal Inference using Multivariate Generalized Propensity Score
+Version: 0.0.0.9000
+Authors@R: 
+    person(given = "Justin",
+           family = "Williams",
+           role = c("aut", "cre"),
+           email = "williazo@ucla.edu",
+           comment = c(ORCID = "https://orcid.org/0000-0002-5045-2764"))
+Description: This package uses methods for estimating weights for multivariate continuous treatments via the generalized propensity score. Weights are constructed assuming an underlying multivariate normal distribution for the exposures. These weights can then subsequently be used to estimate dose-response curves or surfaces. This method achieves balance across all exposure areas rather than along a single dimension.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.0
+RdMacros: Rdpack
+Imports:
+    Rdpack,
+    MASS,
+    WeightIt,
+    cobalt,
+    matrixNormal
