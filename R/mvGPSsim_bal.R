@@ -13,7 +13,6 @@ mvGPSsim_bal <- function(model_list, D, C, all_uni=TRUE){
     if(!ncol(D)>1) stop("'D' must be exposure matric with number of columns greater than or equal to 2", call.=FALSE)
     if(nrow(C)!=nrow(D)) stop("`C` and `D` must have same number of observations `n`")
     n <- nrow(D)
-    source("R CODE/dose_index/mvGPS.R")
     model_list <- match.arg(model_list, c("mvGPS", "entropy", "CBPS", "PS", "GBM"), several.ok=TRUE)
 
     W <- lapply(model_list, function(mod){
