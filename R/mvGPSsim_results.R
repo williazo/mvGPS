@@ -1,19 +1,120 @@
 #' Construct Summary Statistics for Simulation Models
 #'
-#' @param model_list character string identifying which methods to use when constructing weights. See details for a list of appropriate models
-#' @param all_uni logical indicator. If TRUE then all univariate models specified
-#' in model_list will be estimated for each exposure. If FALSE will only estimate weights
-#' for the first exposure
-#' @param D numeric matrix of dimension \code{n} by \code{2} designating values of the exposure
-#' @param C numeric matrix of dimension \code{n} by \code{k} designating values of the confounders
+#' @inheritParams mvGPSsim_bal
+#' @param W list of weights to use in the outcome 
 #' @param alpha numeric vector of length \code{k+2+1} used for constructing the mean of the outcome \code{Y}.
 #' The first term represents the intercept, the next \code{k} terms denote the effect of the confounders,
 #' and the final \code{2} terms represent the true treatment effect
 #' where \code{k} represents the number of confounders
+#' @param perf_metrics character vector of which performance metrics to return. 
+#' Default is to return "MSE" and "bias". See details for other options.
+#' @param sd_Y numeric scalar designating the standard deviation to assume when
+#' generating the outcome. Error term is assummed to be normally distributed.
+#' @inheritParams hull_sample
+#' @param poly_degree integer scalar specifying the polynomial degree which will 
+#' be applied to each exposure and included in the outcome modeling. Default is NULL
+#' signifying that only first order terms are included
+#' @param D_interact logical indicator denoting whether to include all pairwise
+#' interactions of univariate exposures when modeling
 #'
 #' @details Availables models include "mvGPS", "entropy", "CBPS", "PS"
 #'
 #' @export
-mvGPSsim_results <- function(model_list, all_uni=TRUE, D, C, alpha){
-    model_list <- match.arg(model_list, c("mvGPS", "entropy", "CBPS", "PS"), several.ok=TRUE)
+mvGPSsim_results <- function(W, D, C, alpha, sd_Y, num_grid_pts=500, perf_metrics=c("MSE", "bias"), poly_degree=NULL, D_interact=FALSE){
+    perf_metrics <- match.arg(perf_metrics, c("MSE", "bias"), several.ok=TRUE)
+    if(!is.list(W)) stop("`W` must be a list with each element corresponding to weights to be used in outcome regression", call.=FALSE)
+    if(nrow(D)!=nrow(C)) stop("`D` and `C` should have the same number of rows which corresponds to the number of units", call.=FALSE)
+    n <- nrow(D)
+    p <- ncol(D)
+    #this is incase the object W is a data.frame or tibble and we want to convert it directly into a list
+    W <- as.list(W)
+    W_length <- unlist(lapply(W, length))
+    if(!all(W_length==n)) stop("All weights in `W` must be same length as number of units in exposure and confounders. Check length of elements in `W`.", call.=FALSE)
+    
+    
+    #calculating the convex hull data points
+    hull_results <- hull_sample(D, num_grid_pts)
+    hull_grid_pts <- hull_results$grid_pts
+    colnames(hull_grid_pts) <- paste0("D", seq_len(p))
+    
+    #polynomials only
+    if(!is.null(poly_degree) && !D_interact){
+        #transforming the exposure
+        D_poly <- lapply(seq_len(p), function(x) poly(D[, x], degree=poly_degree, raw=TRUE, simple=TRUE))
+        D_poly <- do.call(cbind, D_poly)
+        colnames(D_poly) <- paste0("D", rep(seq_len(p), each=poly_degree), paste0("_poly_", seq_len(poly_degree)))
+        D <- D_poly
+        
+        #transforming the grid points
+        hull_poly <- lapply(seq_len(p), function(x) poly(hull_grid_pts[, x], degree=poly_degree, raw=TRUE, simple=TRUE))
+        hull_poly <- do.call(cbind, hull_poly)
+        colnames(hull_poly) <- paste0("D", rep(seq_len(p), each=poly_degree), paste0("_poly_", seq_len(poly_degree)))
+        hull_grid_pts <- hull_poly
+    }
+    #interaction of first order terms only
+    if(D_interact==TRUE && is.null(poly_degree)){
+        #transforming exposure
+        D_int <- model.matrix(as.formula(paste0("~(", paste(colnames(D), collapse="+"), ")^2-1")), data=data.frame(D))
+        D <- D_int
+        
+        #transforming grid points
+        hull_int <- model.matrix(as.formula(paste0("~(", paste(colnames(hull_grid_pts), collapse="+"), ")^2-1")), data=data.frame(hull_grid_pts))
+        hull_grid_pts <- hull_int
+    }
+    #interactions with polynomials
+    if(D_interact==TRUE && !is.null(poly_degree)){
+        D_poly_int <- model.matrix(as.formula(paste0("~", paste(paste0("poly(",colnames(D), ", degree=", poly_degree, ", raw=TRUE, simple=TRUE)"), collapse="*"), "-1")), data=data.frame(D))
+        D <- D_poly_int
+        
+        #transforming grid points
+        hull_poly_int <- model.matrix(as.formula(paste0("~", paste(paste0("poly(",colnames(hull_grid_pts), ", degree=", poly_degree, ", raw=TRUE, simple=TRUE)"), collapse="*"), "-1")), data=data.frame(hull_grid_pts))
+        hull_grid_pts <- hull_poly_int
+    }
+    
+    if(length(alpha)!=(1+ncol(C)+ncol(D))){
+        stop(paste0("`alpha` is not correctly specified. Needs to be length ", 1+ncol(C)+ncol(D), "\n
+             Transformed `D` matrix has ", ncol(D), " columns"), call.=FALSE)
+        }
+    alpha_D <- alpha[(2+ncol(C)):length(alpha)]
+    #generating the outcome Y as a linear model of C and D given coefficients alpha
+    X <- cbind(intcpt=rep(1, n), C, D)
+    Y <- X%*%alpha + rnorm(n, sd=sd_Y)
+    
+    #generating the ground truth for the points along the sample grid
+    true_Y <- as.numeric(hull_grid_pts%*%alpha_D)
+    
+    #fitting an unadjusted model which accounts does not have any weights or control for confounders
+    unadj_mod <- lm(Y~D)
+    unadj_beta_hat <- coef(unadj_mod)[-1]
+    unadj_y_hat <- as.numeric(hull_grid_pts %*% unadj_beta_hat)
+    
+    mod_fit <- lapply(W, function(w){
+        w_mod <- lm(Y~D, weights=w)
+        beta_hat <- coef(w_mod)[-1]
+        y_hat <- as.numeric(hull_grid_pts %*% beta_hat)
+        return(list(beta_hat=beta_hat, y_hat=y_hat))
+    })
+    
+    mod_fit[["unadj"]] <- list(beta_hat=unadj_beta_hat, y_hat=unadj_y_hat)
+    
+    if("bias"%in%perf_metrics){
+        bias_stats <- lapply(mod_fit, function(m){
+            as.numeric(alpha_D - m$beta_hat)
+        })
+        bias_stats <- do.call(rbind, bias_stats)
+        colnames(bias_stats) <- paste0(colnames(D), "_bias")
+    } else{
+        bias_stats <- NULL
+    }
+    
+    if("MSE"%in%perf_metrics){
+        mse_stats <- lapply(mod_fit, function(m){
+            as.numeric(crossprod(true_Y-m$y_hat)/length(m$y_hat))
+        })
+        mse_stats <- unlist(mse_stats)
+    } else {
+        mse_stats <- NULL
+    }
+    return(list(Y=Y, alpha=alpha, alpha_D=alpha_D, hull_grid_pts=hull_grid_pts, 
+                bias_stats=bias_stats, mse_stats=mse_stats))
 }

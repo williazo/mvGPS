@@ -4,14 +4,18 @@
 \alias{mvGPSsim_results}
 \title{Construct Summary Statistics for Simulation Models}
 \usage{
-mvGPSsim_results(model_list, all_uni = TRUE, D, C, alpha)
+mvGPSsim_results(
+  W,
+  D,
+  C,
+  alpha,
+  sd_Y,
+  num_grid_pts = 500,
+  perf_metrics = c("MSE", "bias")
+)
 }
 \arguments{
-\item{model_list}{character string identifying which methods to use when constructing weights. See details for a list of appropriate models}
-
-\item{all_uni}{logical indicator. If TRUE then all univariate models specified
-in model_list will be estimated for each exposure. If FALSE will only estimate weights
-for the first exposure}
+\item{W}{list of weights to use in the outcome}
 
 \item{D}{numeric matrix of dimension \code{n} by \code{2} designating values of the exposure}
 
@@ -21,6 +25,15 @@ for the first exposure}
 The first term represents the intercept, the next \code{k} terms denote the effect of the confounders,
 and the final \code{2} terms represent the true treatment effect
 where \code{k} represents the number of confounders}
+
+\item{sd_Y}{numeric scalar designating the standard deviation to assume when
+generating the outcome. Error term is assummed to be normally distributed.}
+
+\item{num_grid_pts}{integer scalar denoting the number of parameters to
+search for over the convex hull. Default is 500.}
+
+\item{perf_metrics}{character vector of which performance metrics to return.
+Default is to return "MSE" and "bias". See details for other options.}
 }
 \description{
 Construct Summary Statistics for Simulation Models
