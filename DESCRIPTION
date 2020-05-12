@@ -14,9 +14,10 @@ LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.0
 RdMacros: Rdpack
-Imports:
-    Rdpack,
+Depends:
     MASS,
     WeightIt,
     cobalt,
     matrixNormal
+Imports:
+    Rdpack
