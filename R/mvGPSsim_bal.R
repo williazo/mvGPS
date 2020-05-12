@@ -1,8 +1,14 @@
 #' Construct Covariate Balance Statistics for Simulation Models
 #'
-#' @inheritParams mvGPSsim_results
-#' @importFrom WeightIt weightit
-#' @importFrom cobalt col_w_corr
+#' @param model_list character string identifying which methods to use when constructing weights. See details for a list of appropriate models
+#' @param all_uni logical indicator. If TRUE then all univariate models specified
+#' in model_list will be estimated for each exposure. If FALSE will only estimate weights
+#' for the first exposure
+#' @param D numeric matrix of dimension \code{n} by \code{2} designating values of the exposure
+#' @param C numeric matrix of dimension \code{n} by \code{k} designating values of the confounders
+#' 
+#' @import WeightIt 
+#' @import cobalt
 #'
 #'@export
 #'
