@@ -7,12 +7,15 @@
 #' @param formula an object of class formula that describes the generalized
 #' propensity score model. The outcome must be contain at least two exposures
 #' @param data data.frame that contains variables used in formula
+#' @param trim_w logical indicator for whether to trim weights. default is FALSE
+#' @param trim_quantile numeric scalar used to specify the upper quantile to 
+#' trim weights if applicabile. default is 0.99
 #'
 #' @importFrom stats model.frame model.matrix lm coef dnorm
 #'
 #' @export
 #'
-mvGPS <- function(formula, data = sys.frame(sys.parent())){
+mvGPS <- function(formula, data = sys.frame(sys.parent()), trim_w=FALSE, trim_quantile=0.99){
     if(class(formula) != "formula"){
         stop("`formula` must be a formula", call. = FALSE)
     } else if (length(formula) != 3){
@@ -65,5 +68,11 @@ mvGPS <- function(formula, data = sys.frame(sys.parent())){
     Reduce("*", num_args)
 
     w <- Reduce("*", num_args)/Reduce("*", denom_args)
+    if(trim_w==TRUE){
+        #trimming the large weights
+        w <- ifelse(w<quantile(w, trim_quantile), w, quantile(w, trim_quantile))
+        #trimming the small weights
+        w <- ifelse(w>quantile(w, 1-trim_quantile), w, quantile(w, 1-trim_quantile))
+    }
     return(w)
 }

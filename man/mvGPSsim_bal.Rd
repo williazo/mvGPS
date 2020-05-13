@@ -4,7 +4,7 @@
 \alias{mvGPSsim_bal}
 \title{Construct Covariate Balance Statistics for Simulation Models}
 \usage{
-mvGPSsim_bal(model_list, D, C, all_uni = TRUE)
+mvGPSsim_bal(model_list, D, C, all_uni = TRUE, trim_w = FALSE)
 }
 \arguments{
 \item{model_list}{character string identifying which methods to use when constructing weights. See details for a list of appropriate models}
@@ -16,6 +16,8 @@ mvGPSsim_bal(model_list, D, C, all_uni = TRUE)
 \item{all_uni}{logical indicator. If TRUE then all univariate models specified
 in model_list will be estimated for each exposure. If FALSE will only estimate weights
 for the first exposure}
+
+\item{trim_w}{logical indicator for whether to trim weights for mvGPS method. default is FALSE}
 }
 \description{
 Construct Covariate Balance Statistics for Simulation Models

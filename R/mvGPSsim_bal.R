@@ -6,13 +6,14 @@
 #' for the first exposure
 #' @param D numeric matrix of dimension \code{n} by \code{2} designating values of the exposure
 #' @param C numeric matrix of dimension \code{n} by \code{k} designating values of the confounders
+#' @param trim_w logical indicator for whether to trim weights for mvGPS method. default is FALSE
 #' 
 #' @import WeightIt 
 #' @import cobalt
 #'
-#'@export
+#' @export
 #'
-mvGPSsim_bal <- function(model_list, D, C, all_uni=TRUE){
+mvGPSsim_bal <- function(model_list, D, C, all_uni=TRUE, trim_w=FALSE){
     requireNamespace("WeightIt")
     requireNamespace("cobalt")
     k <- ncol(C)
@@ -23,7 +24,7 @@ mvGPSsim_bal <- function(model_list, D, C, all_uni=TRUE){
 
     W <- lapply(model_list, function(mod){
        if(mod=="mvGPS"){
-           w <- mvGPS(D~C)
+           w <- mvGPS(D~C, trim_w=trim_w)
            w_mvGPS <- list(w)
            names(w_mvGPS) <- "mvGPS"
            w <- w_mvGPS

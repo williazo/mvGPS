@@ -4,13 +4,23 @@
 \alias{mvGPS}
 \title{Multivariate Generalized Propensity Score (mvGPS)}
 \usage{
-mvGPS(formula, data = sys.frame(sys.parent()))
+mvGPS(
+  formula,
+  data = sys.frame(sys.parent()),
+  trim_w = FALSE,
+  trim_quantile = 0.99
+)
 }
 \arguments{
 \item{formula}{an object of class formula that describes the generalized
 propensity score model. The outcome must be contain at least two exposures}
 
 \item{data}{data.frame that contains variables used in formula}
+
+\item{trim_w}{logical indicator for whether to trim weights. default is FALSE}
+
+\item{trim_quantile}{numeric scalar used to specify the upper quantile to
+trim weights if applicabile. default is 0.99}
 }
 \description{
 Construct weights using propensity scores for multivariate continuous exposure
