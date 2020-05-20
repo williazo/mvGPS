@@ -1,6 +1,7 @@
 #' Construct Summary Statistics for Simulation Models
 #'
-#' @inheritParams mvGPSsim_bal
+#' @param D numeric matrix of dimension \code{n} by \code{m} designating values of the exposure
+#' @param C numeric matrix of dimension \code{n} by \code{k} designating values of the confounders for each exposure value
 #' @param W list of weights to use in the outcome 
 #' @param alpha numeric vector of length \code{k+2+1} used for constructing the mean of the outcome \code{Y}.
 #' The first term represents the intercept, the next \code{k} terms denote the effect of the confounders,
@@ -18,14 +19,20 @@
 #' interactions of univariate exposures when modeling
 #'
 #' @details Availables models include "mvGPS", "entropy", "CBPS", "PS"
+#' 
+#' @importFrom stats poly as.formula
 #'
 #' @export
 mvGPSsim_results <- function(W, D, C, alpha, sd_Y, num_grid_pts=500, perf_metrics=c("MSE", "bias"), poly_degree=NULL, D_interact=FALSE){
     perf_metrics <- match.arg(perf_metrics, c("MSE", "bias"), several.ok=TRUE)
-    if(!is.list(W)) stop("`W` must be a list with each element corresponding to weights to be used in outcome regression", call.=FALSE)
-    if(nrow(D)!=nrow(C)) stop("`D` and `C` should have the same number of rows which corresponds to the number of units", call.=FALSE)
     n <- nrow(D)
-    p <- ncol(D)
+    m <- ncol(D)
+    C_n <- nrow(C)
+    k <- ncol(C)
+    if(!is.list(W)) stop("`W` must be a list with each element corresponding to weights to be used in outcome regression", call.=FALSE)
+    if(m<2) stop("'D' must be exposure matrix with number of columns, m, greater than or equal to 2", call.=FALSE)
+    if(!all(C_n==n)) stop("Each matrix in `C` must have same number of observations `n` as `D`", call.=FALSE)
+    
     #this is incase the object W is a data.frame or tibble and we want to convert it directly into a list
     W <- as.list(W)
     W_length <- unlist(lapply(W, length))
@@ -35,20 +42,20 @@ mvGPSsim_results <- function(W, D, C, alpha, sd_Y, num_grid_pts=500, perf_metric
     #calculating the convex hull data points
     hull_results <- hull_sample(D, num_grid_pts)
     hull_grid_pts <- hull_results$grid_pts
-    colnames(hull_grid_pts) <- paste0("D", seq_len(p))
+    colnames(hull_grid_pts) <- paste0("D", seq_len(m))
     
     #polynomials only
     if(!is.null(poly_degree) && !D_interact){
         #transforming the exposure
-        D_poly <- lapply(seq_len(p), function(x) poly(D[, x], degree=poly_degree, raw=TRUE, simple=TRUE))
+        D_poly <- lapply(seq_len(m), function(x) poly(D[, x], degree=poly_degree, raw=TRUE, simple=TRUE))
         D_poly <- do.call(cbind, D_poly)
-        colnames(D_poly) <- paste0("D", rep(seq_len(p), each=poly_degree), paste0("_poly_", seq_len(poly_degree)))
+        colnames(D_poly) <- paste0("D", rep(seq_len(m), each=poly_degree), paste0("_poly_", seq_len(poly_degree)))
         D <- D_poly
         
         #transforming the grid points
-        hull_poly <- lapply(seq_len(p), function(x) poly(hull_grid_pts[, x], degree=poly_degree, raw=TRUE, simple=TRUE))
+        hull_poly <- lapply(seq_len(m), function(x) poly(hull_grid_pts[, x], degree=poly_degree, raw=TRUE, simple=TRUE))
         hull_poly <- do.call(cbind, hull_poly)
-        colnames(hull_poly) <- paste0("D", rep(seq_len(p), each=poly_degree), paste0("_poly_", seq_len(poly_degree)))
+        colnames(hull_poly) <- paste0("D", rep(seq_len(m), each=poly_degree), paste0("_poly_", seq_len(poly_degree)))
         hull_grid_pts <- hull_poly
     }
     #interaction of first order terms only
@@ -70,12 +77,12 @@ mvGPSsim_results <- function(W, D, C, alpha, sd_Y, num_grid_pts=500, perf_metric
         hull_poly_int <- model.matrix(as.formula(paste0("~", paste(paste0("poly(",colnames(hull_grid_pts), ", degree=", poly_degree, ", raw=TRUE, simple=TRUE)"), collapse="*"), "-1")), data=data.frame(hull_grid_pts))
         hull_grid_pts <- hull_poly_int
     }
-    
-    if(length(alpha)!=(1+ncol(C)+ncol(D))){
-        stop(paste0("`alpha` is not correctly specified. Needs to be length ", 1+ncol(C)+ncol(D), "\n
-             Transformed `D` matrix has ", ncol(D), " columns"), call.=FALSE)
+    m <- ncol(D)
+    if(length(alpha)!=(1+k+m)){
+        stop(paste0("`alpha` is not correctly specified. Needs to be length ", 1+k+m, "\n
+             Transformed `D` matrix has ", m, " columns"), call.=FALSE)
         }
-    alpha_D <- alpha[(2+ncol(C)):length(alpha)]
+    alpha_D <- alpha[(2+k):length(alpha)]
     #generating the outcome Y as a linear model of C and D given coefficients alpha
     X <- cbind(intcpt=rep(1, n), C, D)
     Y <- X%*%alpha + rnorm(n, sd=sd_Y)
@@ -115,6 +122,5 @@ mvGPSsim_results <- function(W, D, C, alpha, sd_Y, num_grid_pts=500, perf_metric
     } else {
         mse_stats <- NULL
     }
-    return(list(Y=Y, alpha=alpha, alpha_D=alpha_D, hull_grid_pts=hull_grid_pts, 
-                bias_stats=bias_stats, mse_stats=mse_stats))
+    return(list(bias_stats=bias_stats, mse_stats=mse_stats))
 }

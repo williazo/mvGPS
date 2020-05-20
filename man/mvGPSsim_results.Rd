@@ -19,9 +19,9 @@ mvGPSsim_results(
 \arguments{
 \item{W}{list of weights to use in the outcome}
 
-\item{D}{numeric matrix of dimension \code{n} by \code{2} designating values of the exposure}
+\item{D}{numeric matrix of dimension \code{n} by \code{m} designating values of the exposure}
 
-\item{C}{numeric matrix of dimension \code{n} by \code{k} designating values of the confounders}
+\item{C}{numeric matrix of dimension \code{n} by \code{k} designating values of the confounders for each exposure value}
 
 \item{alpha}{numeric vector of length \code{k+2+1} used for constructing the mean of the outcome \code{Y}.
 The first term represents the intercept, the next \code{k} terms denote the effect of the confounders,
