@@ -4,20 +4,30 @@
 \alias{mvGPSsim_bal}
 \title{Construct Covariate Balance Statistics for Simulation Models}
 \usage{
-mvGPSsim_bal(model_list, D, C, all_uni = TRUE, trim_w = FALSE)
+mvGPSsim_bal(
+  model_list,
+  D,
+  C,
+  all_uni = TRUE,
+  trim_w = FALSE,
+  trim_quantile = 0.99
+)
 }
 \arguments{
 \item{model_list}{character string identifying which methods to use when constructing weights. See details for a list of appropriate models}
 
-\item{D}{numeric matrix of dimension \code{n} by \code{2} designating values of the exposure}
+\item{D}{numeric matrix of dimension \code{n} by \code{m} designating values of the exposure}
 
-\item{C}{numeric matrix of dimension \code{n} by \code{k} designating values of the confounders}
+\item{C}{list of numeric matrices of length \code{m} of dimension \code{n} by \code{k} designating values of the confounders for each exposure value}
 
 \item{all_uni}{logical indicator. If TRUE then all univariate models specified
 in model_list will be estimated for each exposure. If FALSE will only estimate weights
 for the first exposure}
 
 \item{trim_w}{logical indicator for whether to trim weights for mvGPS method. default is FALSE}
+
+\item{trim_quantile}{numeric scalar used to specify the upper quantile to
+trim weights if applicabile. default is 0.99}
 }
 \description{
 Construct Covariate Balance Statistics for Simulation Models
