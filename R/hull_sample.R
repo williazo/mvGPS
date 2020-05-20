@@ -6,6 +6,10 @@
 #' 
 #' @import geometry
 #' @import sp
+#' 
+#' @importFrom grDevices chull
+#' 
+#' @export
 hull_sample <- function(X,  num_grid_pts=500){
     requireNamespace("geometry")
     requireNamespace("sp")
