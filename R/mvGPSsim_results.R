@@ -23,7 +23,7 @@
 #' @importFrom stats poly as.formula
 #'
 #' @export
-mvGPSsim_results <- function(W, D, C, alpha, sd_Y, num_grid_pts=500, perf_metrics=c("MSE", "bias"), poly_degree=NULL, D_interact=FALSE){
+mvGPSsim_results <- function(W, D, C, alpha, sd_Y, num_grid_pts=500, perf_metrics=c("MSE", "bias", "hull MSE"), poly_degree=NULL, D_interact=FALSE){
     perf_metrics <- match.arg(perf_metrics, c("MSE", "bias"), several.ok=TRUE)
     n <- nrow(D)
     m <- ncol(D)
@@ -93,16 +93,20 @@ mvGPSsim_results <- function(W, D, C, alpha, sd_Y, num_grid_pts=500, perf_metric
     #fitting an unadjusted model which accounts does not have any weights or control for confounders
     unadj_mod <- lm(Y~D)
     unadj_beta_hat <- coef(unadj_mod)[-1]
-    unadj_y_hat <- as.numeric(hull_grid_pts %*% unadj_beta_hat)
+    unadj_y_hat <- predict(unadj_mod)
+    hull_unadj_y_hat <- as.numeric(hull_grid_pts %*% unadj_beta_hat)
     
     mod_fit <- lapply(W, function(w){
         w_mod <- lm(Y~D, weights=w)
         beta_hat <- coef(w_mod)[-1]
-        y_hat <- as.numeric(hull_grid_pts %*% beta_hat)
-        return(list(beta_hat=beta_hat, y_hat=y_hat))
+        y_hat <- predict(w_mod)
+        hull_y_hat <- as.numeric(hull_grid_pts %*% beta_hat)
+        return(list(beta_hat=beta_hat, y_hat=y_hat, hull_y_hat=hull_y_hat))
     })
     
-    mod_fit[["unadj"]] <- list(beta_hat=unadj_beta_hat, y_hat=unadj_y_hat)
+    mod_fit[["unadj"]] <- list(beta_hat=unadj_beta_hat, 
+                               y_hat=unadj_y_hat, 
+                               hull_y_hat=hull_unadj_y_hat)
     
     if("bias"%in%perf_metrics){
         bias_stats <- lapply(mod_fit, function(m){
@@ -114,13 +118,22 @@ mvGPSsim_results <- function(W, D, C, alpha, sd_Y, num_grid_pts=500, perf_metric
         bias_stats <- NULL
     }
     
+    if("hull MSE"%in%perf_metrics){
+        hull_mse_stats <- lapply(mod_fit, function(m){
+            as.numeric(crossprod(true_Y-m$hull_y_hat)/length(m$hull_y_hat))
+        })
+        hull_mse_stats <- unlist(hull_mse_stats)
+    } else {
+        hull_mse_stats <- NULL
+    }
+    
     if("MSE"%in%perf_metrics){
         mse_stats <- lapply(mod_fit, function(m){
-            as.numeric(crossprod(true_Y-m$y_hat)/length(m$y_hat))
+            as.numeric(crossprod(Y-m$y_hat)/length(m$y_hat))
         })
         mse_stats <- unlist(mse_stats)
     } else {
         mse_stats <- NULL
     }
-    return(list(bias_stats=bias_stats, mse_stats=mse_stats))
+    return(list(bias_stats=bias_stats, mse_stats=mse_stats, hull_mse_stats=hull_mse_stats))
 }
