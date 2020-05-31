@@ -8,7 +8,7 @@
 #' and the final \code{2} terms represent the true treatment effect
 #' where \code{k} represents the number of confounders
 #' @param perf_metrics character vector of which performance metrics to return. 
-#' Default is to return "MSE" and "bias". See details for other options.
+#' Default is to return "MSE" , "hull MSE", and "bias". See details for other options.
 #' @param sd_Y numeric scalar designating the standard deviation to assume when
 #' generating the outcome. Error term is assummed to be normally distributed.
 #' @inheritParams hull_sample
@@ -20,11 +20,11 @@
 #'
 #' @details Availables models include "mvGPS", "entropy", "CBPS", "PS"
 #' 
-#' @importFrom stats poly as.formula
+#' @importFrom stats poly as.formula predict
 #'
 #' @export
 mvGPSsim_results <- function(W, D, C, alpha, sd_Y, num_grid_pts=500, perf_metrics=c("MSE", "bias", "hull MSE"), poly_degree=NULL, D_interact=FALSE){
-    perf_metrics <- match.arg(perf_metrics, c("MSE", "bias"), several.ok=TRUE)
+    perf_metrics <- match.arg(perf_metrics, c("MSE", "bias",  "hull MSE"), several.ok=TRUE)
     n <- nrow(D)
     m <- ncol(D)
     C_n <- nrow(C)

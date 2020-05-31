@@ -11,7 +11,7 @@ mvGPSsim_results(
   alpha,
   sd_Y,
   num_grid_pts = 500,
-  perf_metrics = c("MSE", "bias"),
+  perf_metrics = c("MSE", "bias", "hull MSE"),
   poly_degree = NULL,
   D_interact = FALSE
 )
@@ -35,7 +35,7 @@ generating the outcome. Error term is assummed to be normally distributed.}
 search for over the convex hull. Default is 500.}
 
 \item{perf_metrics}{character vector of which performance metrics to return.
-Default is to return "MSE" and "bias". See details for other options.}
+Default is to return "MSE" , "hull MSE", and "bias". See details for other options.}
 
 \item{poly_degree}{integer scalar specifying the polynomial degree which will
 be applied to each exposure and included in the outcome modeling. Default is NULL
