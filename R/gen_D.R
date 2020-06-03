@@ -4,9 +4,9 @@
 #'
 #' @param method character value identifying which method so use when generating exposure. for bivariate model \code{uni_cond} is fastest
 #' @param n integer value total number of units
-#' @param rho scalar value identifying correlation of exposures between \[0, 1\]
-#' @param s_d1 scalar value for standard deviation of \code{D1}
-#' @param s_d2 scalar value for standard deviation of \code{D2}
+#' @param rho_cond scalar value identifying conditional correlation of exposures given covariates between \[0, 1\]
+#' @param s_d1_cond scalar value for conditional standard deviation of \code{D1}
+#' @param s_d2_cond scalar value for conditional standard deviation of \code{D2}
 #' @param num_covs integer value determining number of covariates to generate
 #' @param C_mu numeric vector of mean values for covariates. must be same length as \code{num_covs}
 #' @param C_cov scalar value representing constant correlation between covariates
@@ -20,7 +20,7 @@
 #' @importFrom stats rnorm
 #'
 #' @export
-gen_D <- function(method, n, rho, s_d1, s_d2, num_covs, C_mu, C_cov, C_var, d1_beta, d2_beta, seed=NULL){
+gen_D <- function(method, n, rho_cond, s_d1_cond, s_d2_cond, num_covs, C_mu, C_cov, C_var, d1_beta, d2_beta, seed=NULL){
     if(!is.null(seed)) set.seed(seed)
     method <- match.arg(method, c("matrix_normal", "uni_cond", "vector_normal"))
     requireNamespace("MASS")
@@ -35,23 +35,28 @@ gen_D <- function(method, n, rho, s_d1, s_d2, num_covs, C_mu, C_cov, C_var, d1_b
     d1_xbeta <- d_xbeta[, 1]
     d2_xbeta <- d_xbeta[, 2]
 
-    s_d <- c(s_d1, s_d2)
+    s_d_cond <- c(s_d1_cond, s_d2_cond)
 
-    D_corr <- I(2) + matrix(c(0, rho, rho, 0), nrow=2, ncol=2, byrow=TRUE)
-    D_Sigma <- outer(s_d, s_d) * D_corr
+    D_corr_cond <- I(2) + matrix(c(0, rho_cond, rho_cond, 0), nrow=2, ncol=2, byrow=TRUE)
+    D_Sigma_cond <- outer(s_d_cond, s_d_cond) * D_corr_cond
+    
+    # calculating the true marginal covariance
+    D_Sigma <- t(d_beta)%*%C_Sigma%*%d_beta + D_Sigma_cond
+    # true marginal correlation matrix
+    D_corr <- cov2cor(D_Sigma)
+    # true marginal correlation
+    rho <- D_corr[1, 2]
 
     if(method=="matrix_normal"){
-        D <- rmatnorm(M=d_xbeta, U=I(n), V=D_Sigma)
+        D <- rmatnorm(M=d_xbeta, U=I(n), V=D_Sigma_cond)
     } else if(method=="uni_cond"){
-        D1 <- rnorm(n, d1_xbeta, s_d1)
-        D2 <- rnorm(n, d2_xbeta + (s_d2/s_d1)*rho*(D1-d1_xbeta), sqrt((1-rho^2)*s_d2^2))
+        D1 <- rnorm(n, d1_xbeta, s_d1_cond)
+        D2 <- rnorm(n, d2_xbeta + (s_d2_cond/s_d1_cond)*rho_cond*(D1-d1_xbeta), sqrt((1-rho_cond^2)*s_d2_cond^2))
         D <- cbind(D1, D2)
     } else if(method=="vector_normal"){
-        D_vec <- MASS::mvrnorm(1, mu=vec(d_xbeta), Sigma=kronecker(I(n), D_Sigma))
+        D_vec <- MASS::mvrnorm(1, mu=vec(d_xbeta), Sigma=kronecker(I(n), D_Sigma_cond))
         D <- matrix(D_vec, nrow=n)
     }
 
-    varD=t(d_beta)%*%C_Sigma%*%d_beta + D_Sigma
-
-    return(list(D=D, C=C, varD=varD))
+    return(list(D=D, C=C, D_Sigma=D_Sigma, rho=rho))
 }
