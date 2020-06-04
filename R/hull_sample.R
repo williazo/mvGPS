@@ -24,11 +24,12 @@ hull_sample <- function(X,  num_grid_pts=500, trim_hull=FALSE, trim_quantile=NUL
         if(trim_quantile<0.5 | trim_quantile>1) stop("trim_quantile must be between [0.5, 1]", call.=FALSE)
         trim_upper <- apply(X, 2, quantile, trim_quantile)
         trim_lower <- apply(X, 2, quantile, 1 - trim_quantile)
-        X <- sapply(seq_len(p), function(x){
+        X_trim <- sapply(seq_len(p), function(x){
             ifelse(X[, x]>trim_upper[x], NA, 
                    ifelse( X[, x]<trim_lower[x], NA, X[, x]))
         })
-        X <- na.omit(X)
+        colnames(X_trim) <- colnames(X)
+        X <- na.omit(X_trim)
     }
     
     if(p==2){
