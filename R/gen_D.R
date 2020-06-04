@@ -17,7 +17,7 @@
 #'
 #' @importFrom MASS mvrnorm
 #' @importFrom matrixNormal rmatnorm J I vec
-#' @importFrom stats rnorm
+#' @importFrom stats rnorm cov2cor
 #'
 #' @export
 gen_D <- function(method, n, rho_cond, s_d1_cond, s_d2_cond, num_covs, C_mu, C_cov, C_var, d1_beta, d2_beta, seed=NULL){

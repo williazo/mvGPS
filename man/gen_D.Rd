@@ -7,9 +7,9 @@
 gen_D(
   method,
   n,
-  rho,
-  s_d1,
-  s_d2,
+  rho_cond,
+  s_d1_cond,
+  s_d2_cond,
   num_covs,
   C_mu,
   C_cov,
@@ -24,11 +24,11 @@ gen_D(
 
 \item{n}{integer value total number of units}
 
-\item{rho}{scalar value identifying correlation of exposures between [0, 1]}
+\item{rho_cond}{scalar value identifying conditional correlation of exposures given covariates between [0, 1]}
 
-\item{s_d1}{scalar value for standard deviation of \code{D1}}
+\item{s_d1_cond}{scalar value for conditional standard deviation of \code{D1}}
 
-\item{s_d2}{scalar value for standard deviation of \code{D2}}
+\item{s_d2_cond}{scalar value for conditional standard deviation of \code{D2}}
 
 \item{num_covs}{integer value determining number of covariates to generate}
 
