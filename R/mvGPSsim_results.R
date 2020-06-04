@@ -23,7 +23,8 @@
 #' @importFrom stats poly as.formula predict
 #'
 #' @export
-mvGPSsim_results <- function(W, D, C, alpha, sd_Y, num_grid_pts=500, perf_metrics=c("MSE", "bias", "hull MSE"), poly_degree=NULL, D_interact=FALSE){
+mvGPSsim_results <- function(W, D, C, alpha, sd_Y, num_grid_pts=500, trim_hull=FALSE, trim_quantile=NULL,
+                             perf_metrics=c("MSE", "bias", "hull MSE"), poly_degree=NULL, D_interact=FALSE){
     perf_metrics <- match.arg(perf_metrics, c("MSE", "bias",  "hull MSE"), several.ok=TRUE)
     n <- nrow(D)
     m <- ncol(D)
@@ -33,14 +34,14 @@ mvGPSsim_results <- function(W, D, C, alpha, sd_Y, num_grid_pts=500, perf_metric
     if(m<2) stop("'D' must be exposure matrix with number of columns, m, greater than or equal to 2", call.=FALSE)
     if(!all(C_n==n)) stop("Each matrix in `C` must have same number of observations `n` as `D`", call.=FALSE)
     
-    #this is incase the object W is a data.frame or tibble and we want to convert it directly into a list
+    #this is in case the object W is a data.frame or tibble and we want to convert it directly into a list
     W <- as.list(W)
     W_length <- unlist(lapply(W, length))
     if(!all(W_length==n)) stop("All weights in `W` must be same length as number of units in exposure and confounders. Check length of elements in `W`.", call.=FALSE)
     
     
     #calculating the convex hull data points
-    hull_results <- hull_sample(D, num_grid_pts)
+    hull_results <- hull_sample(D, num_grid_pts, trim_hull, trim_quantile)
     hull_grid_pts <- hull_results$grid_pts
     colnames(hull_grid_pts) <- paste0("D", seq_len(m))
     

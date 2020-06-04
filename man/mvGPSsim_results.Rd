@@ -11,6 +11,8 @@ mvGPSsim_results(
   alpha,
   sd_Y,
   num_grid_pts = 500,
+  trim_hull = FALSE,
+  trim_quantile = NULL,
   perf_metrics = c("MSE", "bias", "hull MSE"),
   poly_degree = NULL,
   D_interact = FALSE
@@ -33,6 +35,11 @@ generating the outcome. Error term is assummed to be normally distributed.}
 
 \item{num_grid_pts}{integer scalar denoting the number of parameters to
 search for over the convex hull. Default is 500.}
+
+\item{trim_hull}{logical indicator of whether to restrict convex hull. Default is FALSE}
+
+\item{trim_quantile}{numeric scalar between [0.5, 1] representing the
+quantile value to trim the convex hull. Only used if trim_hull is set to TRUE.}
 
 \item{perf_metrics}{character vector of which performance metrics to return.
 Default is to return "MSE" , "hull MSE", and "bias". See details for other options.}
