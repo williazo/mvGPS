@@ -111,14 +111,29 @@ Y <- X%*%alpha + rnorm(n, sd=sd_Y)
 With the data generated, we can now use our function `mvGPS` to estimate
 weights. These weights are constructed such that the numerator is equal
 to the marginal density, with the denominator corresponding to the
-conditional.
+conditional density, i.e., the multivariate generalized propensity
+score.
 
 <img src="https://latex.codecogs.com/gif.latex?w=\frac{f(\mathbf{D})}{f(\mathbf{D}\mid\mathbf{C})}" title="w=\frac{f(\mathbf{D})}{f(\mathbf{D}\mid\mathbf{C})}" />
+
+In our case since the bivariate exposure is assumed to be bivariate
+normal, we can break both the numerator and denominator into full
+conditional densities knowing that each univariate conditional
+expression will remain normally distributed.
+
+<img src="https://latex.codecogs.com/gif.latex?w=\frac{f(D_2\mid&space;D_1)f(D_1)}{f(D_2\mid&space;D_1,&space;C_2,&space;C_3)f(D_1\mid&space;C_1,&space;C_2)}" title="w=\frac{f(D_2\mid D_1)f(D_1)}{f(D_2\mid D_1, C_2, C_3)f(D_1\mid C_1, C_2)}" />
+
+Notice in the equation above, we are also able to specify the
+confounding set for each exposure separately.
 
 ``` r
 require(mvGPS)
 w <- mvGPS(D=D, C=list(C[, 1:2], C[, 2:3]))
 ```
+
+This vector w now can be used to test balance of confounders by
+comparing weighted vs. unweighted correlations and to estimate the
+treatment effects using weighted least squares regression.
 
 ### Balance Assessment
 
