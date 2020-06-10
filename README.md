@@ -24,7 +24,7 @@ propensity score would be useful, we can construct a simple directed
 acyclic graph (DAG) with a bivariate exposure, **D**=(D<sub>1</sub>,
 D<sub>2</sub>), confounded by a set of confounders **C** shown below.
 
-<img src="README_files/figure-gfm/dag_draw-1.png" width="100%" style="display: block; margin: auto;" />
+<img src="README_files/figure-gfm/dag_draw-1.png" width="50%" style="display: block; margin: auto;" />
 
 To generate this data we first draw *n*=200 samples from **C** assuming
 a multivariate normal distribution with mean equal to zero, variance
@@ -117,11 +117,6 @@ conditional.
 
 ``` r
 require(mvGPS)
-```
-
-    ## Loading required package: mvGPS
-
-``` r
 w <- mvGPS(D=D, C=list(C[, 1:2], C[, 2:3]))
 ```
 
