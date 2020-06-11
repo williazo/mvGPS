@@ -3,7 +3,7 @@ Multivariate Generalized Propensity Score (mvGPS)
 
 The goal of this package is to expand currently available software to
 estimate weights for multivariate continuous exposures. Weights are
-formed assumming a multivariate normal distribution for the simultaneous
+formed assuming a multivariate normal distribution for the simultaneous
 exposures.
 
 # Installation
@@ -108,11 +108,11 @@ Y <- X%*%alpha + rnorm(n, sd=sd_Y)
 
 ### Generating Weights
 
-With the data generated, we can now use our function `mvGPS` to estimate
-weights. These weights are constructed such that the numerator is equal
-to the marginal density, with the denominator corresponding to the
-conditional density, i.e., the multivariate generalized propensity
-score.
+With the data generated, we can now use our primary function `mvGPS()`
+to estimate weights. These weights are constructed such that the
+numerator is equal to the marginal density, with the denominator
+corresponding to the conditional density, i.e., the multivariate
+generalized propensity score.
 
 <img src="https://latex.codecogs.com/gif.latex?w=\frac{f(\mathbf{D})}{f(\mathbf{D}\mid\mathbf{C})}" title="w=\frac{f(\mathbf{D})}{f(\mathbf{D}\mid\mathbf{C})}" />
 
@@ -136,5 +136,350 @@ comparing weighted vs. unweighted correlations and to estimate the
 treatment effects using weighted least squares regression.
 
 ### Balance Assessment
+
+For continuous exposure(s) we can asses balance using several metrics
+such as euclidean distance, maximum absolute correlation, and average
+absolute correlation where correlation refers to the Pearson correlation
+between exposure and covariate.
+
+Below we use the function `mvGPSsim_bal()` to specify a set of potential
+models to use for comparison. Possible models that are available
+include: mvGPS, Entropy, CBPS, GBM, and PS. For methods other than mvGPS
+which can only estimate univariate continuous exposure, each exposure is
+fit separately so that weights are generated for both exposures.
+
+``` r
+require(cobalt)
+require(kableExtra)
+bal_results <- mvGPSsim_bal(model_list=c("mvGPS", "entropy", "CBPS", "PS", "GBM"), D, C=list(C[, 1:2], C[, 2:3]))
+bal_summary <- bal_results$bal_metrics #contains overall summary statistics with respect to balance
+knitr::kable(bal_summary, digits=4, row.names=FALSE, 
+             col.names=c("Euc. Distance", "Max. Abs. Corr.", "Avg. Abs. Corr.", "Method")) %>%
+    kableExtra::kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width=FALSE) %>%
+    kableExtra::row_spec(grep("mvGPS", bal_summary$method), bold=TRUE, background="yellow")
+```
+
+<table class="table table-striped table-hover table-condensed" style="width: auto !important; margin-left: auto; margin-right: auto;">
+
+<thead>
+
+<tr>
+
+<th style="text-align:right;">
+
+Euc. Distance
+
+</th>
+
+<th style="text-align:right;">
+
+Max. Abs. Corr.
+
+</th>
+
+<th style="text-align:right;">
+
+Avg. Abs. Corr.
+
+</th>
+
+<th style="text-align:left;">
+
+Method
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td style="text-align:right;font-weight: bold;background-color: yellow !important;">
+
+0.3126
+
+</td>
+
+<td style="text-align:right;font-weight: bold;background-color: yellow !important;">
+
+0.2499
+
+</td>
+
+<td style="text-align:right;font-weight: bold;background-color: yellow !important;">
+
+0.1329
+
+</td>
+
+<td style="text-align:left;font-weight: bold;background-color: yellow !important;">
+
+mvGPS
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:right;">
+
+0.4279
+
+</td>
+
+<td style="text-align:right;">
+
+0.3704
+
+</td>
+
+<td style="text-align:right;">
+
+0.1462
+
+</td>
+
+<td style="text-align:left;">
+
+entropy\_D1
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:right;">
+
+0.5267
+
+</td>
+
+<td style="text-align:right;">
+
+0.4095
+
+</td>
+
+<td style="text-align:right;">
+
+0.1852
+
+</td>
+
+<td style="text-align:left;">
+
+entropy\_D2
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:right;">
+
+0.4706
+
+</td>
+
+<td style="text-align:right;">
+
+0.4049
+
+</td>
+
+<td style="text-align:right;">
+
+0.1612
+
+</td>
+
+<td style="text-align:left;">
+
+CBPS\_D1
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:right;">
+
+0.6016
+
+</td>
+
+<td style="text-align:right;">
+
+0.4524
+
+</td>
+
+<td style="text-align:right;">
+
+0.2122
+
+</td>
+
+<td style="text-align:left;">
+
+CBPS\_D2
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:right;">
+
+0.4863
+
+</td>
+
+<td style="text-align:right;">
+
+0.4245
+
+</td>
+
+<td style="text-align:right;">
+
+0.1854
+
+</td>
+
+<td style="text-align:left;">
+
+PS\_D1
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:right;">
+
+0.6753
+
+</td>
+
+<td style="text-align:right;">
+
+0.4942
+
+</td>
+
+<td style="text-align:right;">
+
+0.2970
+
+</td>
+
+<td style="text-align:left;">
+
+PS\_D2
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:right;">
+
+0.5976
+
+</td>
+
+<td style="text-align:right;">
+
+0.4867
+
+</td>
+
+<td style="text-align:right;">
+
+0.2511
+
+</td>
+
+<td style="text-align:left;">
+
+GBM\_D1
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:right;">
+
+0.7264
+
+</td>
+
+<td style="text-align:right;">
+
+0.5429
+
+</td>
+
+<td style="text-align:right;">
+
+0.2652
+
+</td>
+
+<td style="text-align:left;">
+
+GBM\_D2
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:right;">
+
+0.9062
+
+</td>
+
+<td style="text-align:right;">
+
+0.5166
+
+</td>
+
+<td style="text-align:right;">
+
+0.4515
+
+</td>
+
+<td style="text-align:left;">
+
+unweighted
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+We can see that our method `mvGPS` has the lowest balance metrics across
+both exposure dimensions.
 
 ### Bias Reduction
