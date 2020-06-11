@@ -34,7 +34,7 @@ that there are 3 confounders
 ``` r
 require(MASS)
 require(matrixNormal)
-set.seed(06102020)
+set.seed(06112020)
 n <- 200
 C_mu <- rep(0, 3)
 C_cov <- 0.3
@@ -87,21 +87,21 @@ By construction our marginal correlation of D is a function of
 parameters from the distribution of **C**, coefficients of conditional
 mean equations, and conditional covariance parameter. For the above
 specification the true marginal correlation of exposure is equal to 0.4
-and our observed marginal correlation is equal to 0.41.
+and our observed marginal correlation is equal to 0.43.
 
 Finally, we specify our outcome, Y, as a linear combination of the
 confounders and exposure. The mean of the dose-response equation is
 shown below,
 
 E\[Y|**D**,
-**C**\]=0.5C<sub>1</sub>+0.3C<sub>2</sub>+0.6C<sub>3</sub>+D<sub>1</sub>+D<sub>2</sub>.
+**C**\]=0.75C<sub>1</sub>+1C<sub>2</sub>+0.6C<sub>3</sub>+D<sub>1</sub>+D<sub>2</sub>.
 
 Both exposures have treatment effect sizes equal to one. The standard
-deviation of our outcome is set equal 4.
+deviation of our outcome is set equal 2.
 
 ``` r
-alpha <- c(0.5, 0.3, 0.6, 1, 1)
-sd_Y <- 4
+alpha <- c(0.75, 1, 0.6, 1, 1)
+sd_Y <- 2
 X <- cbind(C, D)
 Y <- X%*%alpha + rnorm(n, sd=sd_Y)
 ```
@@ -199,19 +199,19 @@ Method
 
 <td style="text-align:right;font-weight: bold;background-color: yellow !important;">
 
-0.3126
+0.2025
 
 </td>
 
 <td style="text-align:right;font-weight: bold;background-color: yellow !important;">
 
-0.2499
+0.1802
 
 </td>
 
 <td style="text-align:right;font-weight: bold;background-color: yellow !important;">
 
-0.1329
+0.0836
 
 </td>
 
@@ -227,19 +227,19 @@ mvGPS
 
 <td style="text-align:right;">
 
-0.4279
+0.3682
 
 </td>
 
 <td style="text-align:right;">
 
-0.3704
+0.2610
 
 </td>
 
 <td style="text-align:right;">
 
-0.1462
+0.1302
 
 </td>
 
@@ -255,19 +255,19 @@ entropy\_D1
 
 <td style="text-align:right;">
 
-0.5267
+0.4687
 
 </td>
 
 <td style="text-align:right;">
 
-0.4095
+0.4272
 
 </td>
 
 <td style="text-align:right;">
 
-0.1852
+0.1550
 
 </td>
 
@@ -283,19 +283,19 @@ entropy\_D2
 
 <td style="text-align:right;">
 
-0.4706
+0.3402
 
 </td>
 
 <td style="text-align:right;">
 
-0.4049
+0.2445
 
 </td>
 
 <td style="text-align:right;">
 
-0.1612
+0.1203
 
 </td>
 
@@ -311,19 +311,19 @@ CBPS\_D1
 
 <td style="text-align:right;">
 
-0.6016
+0.4868
 
 </td>
 
 <td style="text-align:right;">
 
-0.4524
+0.3513
 
 </td>
 
 <td style="text-align:right;">
 
-0.2122
+0.1852
 
 </td>
 
@@ -339,19 +339,19 @@ CBPS\_D2
 
 <td style="text-align:right;">
 
-0.4863
+0.3497
 
 </td>
 
 <td style="text-align:right;">
 
-0.4245
+0.2489
 
 </td>
 
 <td style="text-align:right;">
 
-0.1854
+0.1391
 
 </td>
 
@@ -367,19 +367,19 @@ PS\_D1
 
 <td style="text-align:right;">
 
-0.6753
+0.5594
 
 </td>
 
 <td style="text-align:right;">
 
-0.4942
+0.4370
 
 </td>
 
 <td style="text-align:right;">
 
-0.2970
+0.2467
 
 </td>
 
@@ -395,19 +395,19 @@ PS\_D2
 
 <td style="text-align:right;">
 
-0.5976
+0.3681
 
 </td>
 
 <td style="text-align:right;">
 
-0.4867
+0.2657
 
 </td>
 
 <td style="text-align:right;">
 
-0.2511
+0.1319
 
 </td>
 
@@ -423,19 +423,19 @@ GBM\_D1
 
 <td style="text-align:right;">
 
-0.7264
+0.4545
 
 </td>
 
 <td style="text-align:right;">
 
-0.5429
+0.3711
 
 </td>
 
 <td style="text-align:right;">
 
-0.2652
+0.1859
 
 </td>
 
@@ -451,19 +451,19 @@ GBM\_D2
 
 <td style="text-align:right;">
 
-0.9062
+0.9535
 
 </td>
 
 <td style="text-align:right;">
 
-0.5166
+0.5231
 
 </td>
 
 <td style="text-align:right;">
 
-0.4515
+0.4738
 
 </td>
 
@@ -483,3 +483,129 @@ We can see that our method `mvGPS` has the lowest balance metrics across
 both exposure dimensions.
 
 ### Bias Reduction
+
+Finally, we want to check that these weights are properly reducing the
+bias when we estimate the exposure treatment effect. To do this we will
+use the function. To do this we can construct a weighted least squares
+regression.
+
+``` r
+dt <- data.frame(Y, D, w=w)
+#using mvGPS weights
+wls_mod <- lm(Y ~ D1 + D2, weights=w, data=dt)
+mvGPS_tx_hat <- coef(wls_mod)[c("D1", "D2")]
+
+#unadjusted estimates for treatment effects
+unadj_mod <- lm(Y ~ D1 + D2, data=dt)
+unadj_tx_hat <- coef(unadj_mod)[c("D1", "D2")]
+
+bias_tbl <- cbind(truth=c(1, 1), mvGPS=mvGPS_tx_hat, unadj=unadj_tx_hat)
+knitr::kable(bias_tbl, digits=2, row.names=TRUE, 
+             col.names=c("Truth", "mvGPS", "Unadjusted"))%>%
+    kableExtra::kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width=FALSE) %>%
+    kableExtra::column_spec(grep("mvGPS", colnames(bias_tbl))+1, bold=TRUE, background="yellow")
+```
+
+<table class="table table-striped table-hover table-condensed" style="width: auto !important; margin-left: auto; margin-right: auto;">
+
+<thead>
+
+<tr>
+
+<th style="text-align:left;">
+
+</th>
+
+<th style="text-align:right;">
+
+Truth
+
+</th>
+
+<th style="text-align:right;">
+
+mvGPS
+
+</th>
+
+<th style="text-align:right;">
+
+Unadjusted
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td style="text-align:left;">
+
+D1
+
+</td>
+
+<td style="text-align:right;">
+
+1
+
+</td>
+
+<td style="text-align:right;font-weight: bold;background-color: yellow !important;">
+
+1.17
+
+</td>
+
+<td style="text-align:right;">
+
+1.35
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+D2
+
+</td>
+
+<td style="text-align:right;">
+
+1
+
+</td>
+
+<td style="text-align:right;font-weight: bold;background-color: yellow !important;">
+
+1.15
+
+</td>
+
+<td style="text-align:right;">
+
+1.26
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+To compare the total reduction at bias we look at the total absolute
+bias where we see mvGPS has total bias equal to 0.33, or an average
+percent bias of 16.37% per exposure, compared to unadjusted total bias
+equal to 0.61, or an average percent bias of 30.32% per exposure. We
+therefore achieve 1.85 times reduction in bias.
+
+### Defining Estimable Region
+
+### Dose-Response Surface
