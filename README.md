@@ -128,7 +128,8 @@ confounding set for each exposure separately.
 
 ``` r
 require(mvGPS)
-w <- mvGPS(D=D, C=list(C[, 1:2], C[, 2:3]))
+out_mvGPS <- mvGPS(D=D, C=list(C[, 1:2], C[, 2:3]))
+w <- out_mvGPS$w
 ```
 
 This vector w now can be used to test balance of confounders by
@@ -142,16 +143,15 @@ such as euclidean distance, maximum absolute correlation, and average
 absolute correlation where correlation refers to the Pearson correlation
 between exposure and covariate.
 
-Below we use the function `mvGPSsim_bal()` to specify a set of potential
-models to use for comparison. Possible models that are available
-include: mvGPS, Entropy, CBPS, GBM, and PS. For methods other than mvGPS
-which can only estimate univariate continuous exposure, each exposure is
-fit separately so that weights are generated for both exposures.
+Below we use the function `bal()` to specify a set of potential models
+to use for comparison. Possible models that are available include:
+mvGPS, Entropy, CBPS, GBM, and PS. For methods other than mvGPS which
+can only estimate univariate continuous exposure, each exposure is fit
+separately so that weights are generated for both exposures.
 
 ``` r
-require(cobalt)
 require(kableExtra)
-bal_results <- mvGPSsim_bal(model_list=c("mvGPS", "entropy", "CBPS", "PS", "GBM"), D, C=list(C[, 1:2], C[, 2:3]))
+bal_results <- bal(model_list=c("mvGPS", "entropy", "CBPS", "PS", "GBM"), D, C=list(C[, 1:2], C[, 2:3]))
 bal_summary <- bal_results$bal_metrics #contains overall summary statistics with respect to balance
 knitr::kable(bal_summary, digits=4, row.names=FALSE, 
              col.names=c("Euc. Distance", "Max. Abs. Corr.", "Avg. Abs. Corr.", "Method")) %>%
