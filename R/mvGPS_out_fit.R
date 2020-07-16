@@ -1,6 +1,6 @@
 #' Fit linear outcome regression using potential weights
 #'
-#' @inheritParams mvGPSsim_bal
+#' @inheritParams bal
 #' @param Y numeric vector specifying the outcome of interest
 #' @param W list of weights to use in the outcome 
 #' @inheritParams hull_sample

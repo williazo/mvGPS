@@ -1,7 +1,8 @@
-#' Construct Covariate Balance Statistics for Simulation Models
+#' Construct Covariate Balance Statistics for Models with Multivariate Exposure
 #'
 #' @inheritParams mvGPS
-#' @param model_list character string identifying which methods to use when constructing weights. See details for a list of appropriate models
+#' @param model_list character string identifying which methods to use when 
+#' constructing weights. See details for a list of appropriate models
 #' @param all_uni logical indicator. If TRUE then all univariate models specified
 #' in model_list will be estimated for each exposure. If FALSE will only estimate weights
 #' for the first exposure
@@ -10,27 +11,28 @@
 #' @import WeightIt 
 #' @import cobalt
 #' 
+#' @details 
+#' When using propensity score methods for causal inference it is crucial to 
+#' check the balancing property of the covariates and exposure(s). 
+#' 
 #' @importFrom stats quantile
 #'
 #' @export
 #'
-mvGPSsim_bal <- function(model_list, D, C, all_uni=TRUE, trim_w=FALSE, trim_quantile=0.99){
-    requireNamespace("WeightIt")
-    requireNamespace("cobalt")
-    n <- nrow(D)
+bal <- function(model_list, D, C, all_uni=TRUE, common=FALSE, trim_w=FALSE, trim_quantile=0.99){
     m <- ncol(D)
-    C_k <- unlist(lapply(C, ncol))
-    C_n <- unlist(lapply(C, nrow))
-    if(m<2) stop("'D' must be exposure matrix with number of columns, m, greater than or equal to 2", call.=FALSE)
-    if(length(C)!=m) stop("`C` must be a list of length, m, where each list element represents the confounders for the corresponding exposure", call.=FALSE)
-    if(!all(C_n==n)) stop("Each matrix in `C` must have same number of observations `n` as `D`", call.=FALSE)
+    m_list <- as.list(match.arg(model_list, 
+                                    c("mvGPS", "entropy", "CBPS", "PS", "GBM"), 
+                                    several.ok=TRUE))
+    if(any(!model_list %in% unlist(m_list))){
+        exclude_m <- model_list[!model_list %in% unlist(m_list)]
+        warning("The following model(s) specified but not used: ", paste(exclude_m, collapse=", "), call.=FALSE)
+    }
     
-    model_list <- match.arg(model_list, c("mvGPS", "entropy", "CBPS", "PS", "GBM"), several.ok=TRUE)
-
-    W <- lapply(model_list, function(mod){
+    W <- lapply(m_list, function(mod){
        if(mod=="mvGPS"){
-           w <- mvGPS(D, C, trim_w=trim_w, trim_quantile=trim_quantile)
-           w_mvGPS <- list(w)
+           w <- mvGPS(D, C, common, trim_w, trim_quantile)
+           w_mvGPS <- list(w$wts)
            names(w_mvGPS) <- "mvGPS"
            w <- w_mvGPS
        }else if(mod=="entropy"){

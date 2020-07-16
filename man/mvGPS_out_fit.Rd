@@ -19,9 +19,12 @@ mvGPS_out_fit(
 
 \item{W}{list of weights to use in the outcome}
 
-\item{D}{numeric matrix of dimension \code{n} by \code{m} designating values of the exposure}
+\item{D}{numeric matrix of dimension \eqn{n} by \eqn{m} designating values of the exposures}
 
-\item{C}{list of numeric matrices of length \code{m} of dimension \code{n} by \code{k} designating values of the confounders for each exposure value}
+\item{C}{either a list of numeric matrices of length \eqn{m} of dimension
+\eqn{n} by \eqn{p_j} designating values of the confounders for each exposure
+value or if \code{common} is TRUE a single matrix of of dimension \eqn{n} by
+\eqn{p} that represents common confounders for all exposures.}
 
 \item{num_grid_pts}{integer scalar denoting the number of parameters to
 search for over the convex hull. Default is 500.}
