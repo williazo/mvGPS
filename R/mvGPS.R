@@ -12,6 +12,8 @@
 #' @param trim_w logical indicator for whether to trim weights. default is FALSE
 #' @param trim_quantile numeric scalar used to specify the upper quantile to 
 #' trim weights if applicable. default is 0.99
+#' 
+#' @details 
 #'
 #' @importFrom stats model.frame model.matrix lm coef dnorm quantile
 #' 
@@ -21,17 +23,20 @@
 #' @export
 #'
 mvGPS <- function(D, C, common=FALSE, trim_w=FALSE, trim_quantile=0.99){
+    D <- as.matrix(D)
     m <- ncol(D)
     n <- nrow(D)
     if(common){
+        C <- as.matrix(C)
         if(is.list(C)) stop("common=TRUE, expecting C to be single matrix of common confounders", call.=FALSE)
         C <- rep(list(C), m)
     } else {
         if(!is.list(C)) stop("common=FALSE, C must be list of length m", call.=FALSE)
+        C <- lapply(C, as.matrix)
     }
     C_k <- unlist(lapply(C, ncol))
     C_n <- unlist(lapply(C, nrow))
-    if(is.null(m)) stop("Exposure must be multivariate. See details to ensure formula is properly specified", call.=FALSE)
+    if(m < 2) stop("Exposure must be multivariate. See details to ensure formula is properly specified", call.=FALSE)
     if(!all(C_n==n)) stop("Each matrix in C must have same number of observations, n, as D", call.=FALSE)
     if(length(C)!=m) stop("Set of confounders not equal to number of exposures, m.")
 
