@@ -19,13 +19,16 @@
 #'
 #' @export
 #'
-bal <- function(model_list, D, C, all_uni=TRUE, common=FALSE, trim_w=FALSE, trim_quantile=0.99){
-    m <- ncol(D)
+bal <- function(model_list, D, C, common=FALSE, trim_w=FALSE, trim_quantile=0.99, all_uni=TRUE){
+    check_result <- D_C_check(D, C, common)
+    e <- environment()
+    list2env(check_result, e)
+    
     m_list <- as.list(match.arg(model_list, 
                                     c("mvGPS", "entropy", "CBPS", "PS", "GBM"), 
                                     several.ok=TRUE))
-    if(any(!model_list %in% unlist(m_list))){
-        exclude_m <- model_list[!model_list %in% unlist(m_list)]
+    if(any(is.na(pmatch(model_list, unlist(m_list))))){
+        exclude_m <- model_list[is.na(pmatch(model_list, unlist(m_list)))]
         warning("The following model(s) specified but not used: ", paste(exclude_m, collapse=", "), call.=FALSE)
     }
     
@@ -35,10 +38,10 @@ bal <- function(model_list, D, C, all_uni=TRUE, common=FALSE, trim_w=FALSE, trim
            w_mvGPS <- list(w$wts)
            names(w_mvGPS) <- "mvGPS"
            w <- w_mvGPS
-       }else if(mod=="entropy"){
+       } else { #all other methods use the weightit function
            if(all_uni==TRUE){
-               w_entropy <- lapply(seq_len(m), function(d){
-                   w <- weightit(D[, d]~C[[d]], method="entropy")
+               w <- lapply(seq_len(m), function(d){
+                   w <- weightit(D[, d]~C[[d]], method=mod)
                    w <- w$weights
                    if(trim_w==TRUE){
                        #trimming the large weights
@@ -48,101 +51,19 @@ bal <- function(model_list, D, C, all_uni=TRUE, common=FALSE, trim_w=FALSE, trim
                    }
                    w
                })
-               names(w_entropy) <- paste0("entropy_D", seq_len(m))
+               names(w) <- paste0(mod, "_", colnames(D))
            } else {
-               w_entropy <- weightit(D[, 1]~C[[1]], method="entropy")
-               w <- w_entropy$weights
+               w <- weightit(D[, 1]~C[[1]], method=mod)
+               w <- w$weights
                if(trim_w==TRUE){
                    #trimming the large weights
                    w <- ifelse(w<quantile(w, trim_quantile), w, quantile(w, trim_quantile))
                    #trimming the small weights
                    w <- ifelse(w>quantile(w, 1-trim_quantile), w, quantile(w, 1-trim_quantile))
                }
-               w_entropy <- list(w)
-               names(w_entropy) <- "entropy_D1"
+               w <- list(w)
+               names(w) <- paste0(mod, "_", colnames(D)[1])
            }
-           w <- w_entropy
-       }else if(mod=="CBPS"){
-           if(all_uni==TRUE){
-               w_CBPS <- lapply(seq_len(m), function(d){
-                   w <- weightit(D[, d]~C[[d]], method="cbps", over=FALSE)
-                   w <- w$weights
-                   if(trim_w==TRUE){
-                       #trimming the large weights
-                       w <- ifelse(w<quantile(w, trim_quantile), w, quantile(w, trim_quantile))
-                       #trimming the small weights
-                       w <- ifelse(w>quantile(w, 1-trim_quantile), w, quantile(w, 1-trim_quantile))
-                   }
-                   w
-               })
-               names(w_CBPS) <- paste0("CBPS_D", seq_len(m))
-           } else {
-               w_CBPS <- weightit(D[, 1]~C[[1]], method="cbps", over=FALSE)
-               w <- w_CBPS$weights
-               if(trim_w==TRUE){
-                   #trimming the large weights
-                   w <- ifelse(w<quantile(w, trim_quantile), w, quantile(w, trim_quantile))
-                   #trimming the small weights
-                   w <- ifelse(w>quantile(w, 1-trim_quantile), w, quantile(w, 1-trim_quantile))
-               }
-               w_CBPS <- list(w)
-               names(w_CBPS) <- "CBPS_D1"
-           }
-           w <- w_CBPS
-       } else if(mod=="PS"){
-           if(all_uni==TRUE){
-               w_PS <- lapply(seq_len(m), function(d){
-                   w <- weightit(D[, d]~C[[d]], method="ps")
-                   w <- w$weights
-                   if(trim_w==TRUE){
-                       #trimming the large weights
-                       w <- ifelse(w<quantile(w, trim_quantile), w, quantile(w, trim_quantile))
-                       #trimming the small weights
-                       w <- ifelse(w>quantile(w, 1-trim_quantile), w, quantile(w, 1-trim_quantile))
-                   }
-                   w
-               })
-               names(w_PS) <- paste0("PS_D", seq_len(m))
-           } else {
-               w_PS <- weightit(D[, 1]~C[[1]], method="ps")
-               w <- w_PS$weights
-               if(trim_w==TRUE){
-                   #trimming the large weights
-                   w <- ifelse(w<quantile(w, trim_quantile), w, quantile(w, trim_quantile))
-                   #trimming the small weights
-                   w <- ifelse(w>quantile(w, 1-trim_quantile), w, quantile(w, 1-trim_quantile))
-               }
-               w_PS <- list(w)
-               names(w_PS) <- "PS_D1"
-           }
-           w <- w_PS
-       } else if(mod=="GBM"){
-           if(all_uni==TRUE){
-               w_GBM <- lapply(seq_len(m), function(d){
-                   w <- weightit(D[, d]~C[[d]], method="GBM", stop.method="p.mean")
-                   w <- w$weights
-                   if(trim_w==TRUE){
-                       #trimming the large weights
-                       w <- ifelse(w<quantile(w, trim_quantile), w, quantile(w, trim_quantile))
-                       #trimming the small weights
-                       w <- ifelse(w>quantile(w, 1-trim_quantile), w, quantile(w, 1-trim_quantile))
-                   }
-                   w
-               })
-               names(w_GBM) <- paste0("GBM_D", seq_len(m))
-           } else {
-               w_GBM <- weightit(D[, 1]~C[[1]], method="GBM", stop.method="p.mean")
-               w <- w_GBM$weights
-               if(trim_w==TRUE){
-                   #trimming the large weights
-                   w <- ifelse(w<quantile(w, trim_quantile), w, quantile(w, trim_quantile))
-                   #trimming the small weights
-                   w <- ifelse(w>quantile(w, 1-trim_quantile), w, quantile(w, 1-trim_quantile))
-               }
-               w_GBM <- list(w)
-               names(w_GBM) <- "GBM_D1"
-           }
-           w <- w_GBM
        }
        return(w)
    })
@@ -150,27 +71,20 @@ bal <- function(model_list, D, C, all_uni=TRUE, common=FALSE, trim_w=FALSE, trim
 
     #calculating correlation using weights
     D_corr_unweight <- lapply(seq_len(m), function(dose){
-        cobalt::col_w_corr(C[[dose]], D[, dose])
+        col_w_corr(C[[dose]], D[, dose])
     })
-    names(D_corr_unweight) <- paste0("D", seq_len(m), "_cor")
-    # D_corr_unweight_mat <- matrix(unlist(D_corr_unweight), nrow=sum(C_k), ncol=m, 
-    #                               dimnames=list(unlist(lapply(seq_len(m), function(i) paste0("C", i, "_", seq_len(C_k[i])))), names(D_corr_unweight)))
-
+    names(D_corr_unweight) <- paste0(colnames(D), "_cor")
+    
     cor_list <- lapply(W, function(w){
         D_corr_w <- lapply(seq_len(m), function(dose){
-            cobalt::col_w_corr(C[[dose]], D[, dose], weights=w)
+            col_w_corr(C[[dose]], D[, dose], weights=w)
         })
-        names(D_corr_w) <- paste0("D", seq_len(m), "_cor")
-        # D_corr_mat <-  matrix(unlist(D_corr_w), nrow=sum(C_k), ncol=m, 
-        #                       dimnames=list(c(paste0("C1_", seq_len(C_k[1])), paste0("C2_", seq_len(C_k[2]))), names(D_corr_w)))
+        names(D_corr_w) <- paste0(colnames(D), "_cor")
         return(D_corr_w)
     })
     cor_list[["unweighted"]] <- D_corr_unweight
-    # cor_df <- data.frame(cor_total, method=unlist(sapply(C_k, function(x) rep(c("unweighted", names(cor_list)), each=x))), 
-    #                      covariate=c(paste0("C1_", seq_len(C_k[1])), paste0("C2_", seq_len(C_k[2]))))
 
     #calculating summary balance metrics by group
-    # bal_group <- split(cor_df, cor_df$method)
     bal_metrics <- lapply(cor_list, function(x){
         cor_vec <- unlist(x)
         euc_dist = sum(sqrt(sum(cor_vec^2))) #since point of reference is [0, 0]
@@ -186,5 +100,6 @@ bal <- function(model_list, D, C, all_uni=TRUE, common=FALSE, trim_w=FALSE, trim
     ess <- lapply(W, function(w) sum(w)^2/sum(w^2))
     ess <- unlist(ess)
 
-    return(list(W=W, cor_list=cor_list, bal_metrics=bal_metrics, ess=ess))
+    return(list(W=W, cor_list=cor_list, bal_metrics=bal_metrics, ess=ess, 
+                models=unlist(m_list)))
 }

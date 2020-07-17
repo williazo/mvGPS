@@ -8,10 +8,10 @@ bal(
   model_list,
   D,
   C,
-  all_uni = TRUE,
   common = FALSE,
   trim_w = FALSE,
-  trim_quantile = 0.99
+  trim_quantile = 0.99,
+  all_uni = TRUE
 )
 }
 \arguments{
@@ -25,10 +25,6 @@ constructing weights. See details for a list of appropriate models}
 value or if \code{common} is TRUE a single matrix of of dimension \eqn{n} by
 \eqn{p} that represents common confounders for all exposures.}
 
-\item{all_uni}{logical indicator. If TRUE then all univariate models specified
-in model_list will be estimated for each exposure. If FALSE will only estimate weights
-for the first exposure}
-
 \item{common}{logical indicator for whether C is a single matrix of common
 confounders for all exposures. default is FALSE meaning C must be specified
 as list of confounders of length \eqn{m}.}
@@ -37,6 +33,10 @@ as list of confounders of length \eqn{m}.}
 
 \item{trim_quantile}{numeric scalar used to specify the upper quantile to
 trim weights if applicable. default is 0.99}
+
+\item{all_uni}{logical indicator. If TRUE then all univariate models specified
+in model_list will be estimated for each exposure. If FALSE will only estimate weights
+for the first exposure}
 }
 \description{
 Construct Covariate Balance Statistics for Models with Multivariate Exposure

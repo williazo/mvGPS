@@ -98,23 +98,10 @@
 #' @export
 #'
 mvGPS <- function(D, C, common=FALSE, trim_w=FALSE, trim_quantile=0.99){
-    D <- as.matrix(D)
-    m <- ncol(D)
-    n <- nrow(D)
-    if(common){
-        C <- as.matrix(C)
-        if(is.list(C)) stop("common=TRUE, expecting C to be single matrix of common confounders", call.=FALSE)
-        C <- rep(list(C), m)
-    } else {
-        if(!is.list(C)) stop("common=FALSE, C must be list of length m", call.=FALSE)
-        C <- lapply(C, as.matrix)
-    }
-    C_k <- unlist(lapply(C, ncol))
-    C_n <- unlist(lapply(C, nrow))
-    if(m < 2) stop("Exposure must be multivariate. See details to ensure formula is properly specified", call.=FALSE)
-    if(!all(C_n==n)) stop("Each matrix in C must have same number of observations, n, as D", call.=FALSE)
-    if(length(C)!=m) stop("Set of confounders not equal to number of exposures, m.")
-
+    check_result <- D_C_check(D, C, common)
+    e <- environment()
+    list2env(check_result, e)
+    
     for(i in seq_len(m)){
         if(i==1){
             #marginal densities factorized
@@ -164,4 +151,41 @@ mvGPS <- function(D, C, common=FALSE, trim_w=FALSE, trim_quantile=0.99){
         w <- ifelse(w>quantile(w, 1-trim_quantile), w, quantile(w, 1-trim_quantile))
     }
     return(list(score=score, wts=w))
+}
+
+#' Internal function for formatting and checking specification of exposures and
+#' confounders
+#' 
+#' @inheritParams mvGPS
+#' 
+#' @importFrom stats quantile
+D_C_check <- function(D, C, common){
+    D <- as.matrix(D)
+    m <- ncol(D)
+    if(is.null(colnames(D))) colnames(D) <- paste0("D", seq_len(m))
+    n <- nrow(D)
+    if(common){
+        C <- as.matrix(C)
+        if(is.null(colnames(C))) colnames(C) <- paste0("C", seq_len(ncol(C)))
+        if(is.list(C)) stop("common=TRUE, expecting C to be single matrix of common confounders", call.=FALSE)
+        C <- rep(list(C), m)
+    } else {
+        if(!is.list(C)) stop("common=FALSE, C must be list of length m", call.=FALSE)
+        C <- lapply(seq_len(length(C)), function(x){
+            X <- as.matrix(C[[x]])
+             
+            if(is.null(colnames(X))){
+                p_j <- ncol(X)
+                colnames(X) <- paste0("C_",x, "_", seq_len(p_j))
+            }
+            return(X)
+            })
+        
+    }
+    C_k <- unlist(lapply(C, ncol))
+    C_n <- unlist(lapply(C, nrow))
+    if(m < 2) stop("Exposure must be multivariate. See details to ensure formula is properly specified", call.=FALSE)
+    if(!all(C_n==n)) stop("Each matrix in C must have same number of observations, n, as D", call.=FALSE)
+    if(length(C)!=m) stop("Set of confounders not equal to number of exposures, m.")
+    return(list(D=D, m=m, n=n, C=C, C_k=C_k, C_n=C_n))
 }
