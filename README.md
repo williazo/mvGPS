@@ -1,6 +1,13 @@
 Multivariate Generalized Propensity Score (mvGPS)
 ================
 
+<!-- begin badges -->
+
+[![Build
+Status](https://travis-ci.org/williazo/mvGPS.svg?branch=master)](https://travis-ci.org/williazo/mvGPS)
+[![codecov](https://codecov.io/gh/williazo/mvGPS/branch/master/graph/badge.svg)](https://codecov.io/gh/williazo/mvGPS)
+<!-- end badges -->
+
 The goal of this package is to expand currently available software to
 estimate weights for multivariate continuous exposures. Weights are
 formed assuming a multivariate normal distribution for the simultaneous
