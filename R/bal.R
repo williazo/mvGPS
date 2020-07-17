@@ -10,6 +10,7 @@
 #' 
 #' @import WeightIt 
 #' @import cobalt
+#' @import gbm
 #' 
 #' @details 
 #' When using propensity score methods for causal inference it is crucial to 
@@ -21,8 +22,10 @@
 #'
 bal <- function(model_list, D, C, common=FALSE, trim_w=FALSE, trim_quantile=0.99, all_uni=TRUE){
     check_result <- D_C_check(D, C, common)
-    e <- environment()
-    list2env(check_result, e)
+    assign("D", check_result$D)
+    assign("C", check_result$C)
+    
+    m <- ncol(D)
     
     m_list <- as.list(match.arg(model_list, 
                                     c("mvGPS", "entropy", "CBPS", "PS", "GBM"), 

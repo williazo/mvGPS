@@ -99,8 +99,10 @@
 #'
 mvGPS <- function(D, C, common=FALSE, trim_w=FALSE, trim_quantile=0.99){
     check_result <- D_C_check(D, C, common)
-    e <- environment()
-    list2env(check_result, e)
+    assign("D", check_result$D)
+    assign("C", check_result$C)
+
+    m <- ncol(D)
     
     for(i in seq_len(m)){
         if(i==1){
@@ -187,5 +189,5 @@ D_C_check <- function(D, C, common){
     if(m < 2) stop("Exposure must be multivariate. See details to ensure formula is properly specified", call.=FALSE)
     if(!all(C_n==n)) stop("Each matrix in C must have same number of observations, n, as D", call.=FALSE)
     if(length(C)!=m) stop("Set of confounders not equal to number of exposures, m.")
-    return(list(D=D, m=m, n=n, C=C, C_k=C_k, C_n=C_n))
+    return(list(D=D, C=C))
 }

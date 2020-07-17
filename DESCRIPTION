@@ -23,7 +23,8 @@ Imports:
     cobalt,
     matrixNormal,
     geometry,
-    sp
+    sp,
+    gbm
 BugReports: https://github.com/williazo/mvGPS/issues
 URL: https://github.com/williazo/mvGPS
 Suggests: 
