@@ -7,7 +7,7 @@
 hull_sample(X, num_grid_pts = 500, trim_hull = FALSE, trim_quantile = NULL)
 }
 \arguments{
-\item{X}{numeric matrix of n by p dimensions. Each row corresponds to a point in p-dimensional space.}
+\item{X}{numeric matrix of n by m dimensions. Each row corresponds to a point in m-dimensional space.}
 
 \item{num_grid_pts}{integer scalar denoting the number of parameters to
 search for over the convex hull. Default is 500.}
@@ -18,5 +18,12 @@ search for over the convex hull. Default is 500.}
 quantile value to trim the convex hull. Only used if trim_hull is set to TRUE.}
 }
 \description{
-Sample Points Along a Convex Hull
+To define a proper estimable region with multivariate exposure we construct
+a convex hull of the data in order to maintain the positivity identifying assumption.
+We also provide options to create trimmed versions of the convex hull to further
+restrict to high density regions in multidimensional space.
+}
+\details{
+Assume that \eqn{X} is an \eqn{n\times m} matrix representing the multivariate
+exposure of interest. We can
 }

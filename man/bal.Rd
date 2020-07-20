@@ -48,7 +48,11 @@ for the first exposure}
 }
 }
 \description{
-Construct Covariate Balance Statistics for Models with Multivariate Exposure
+Assessing balance between exposure(s) and confounders is key when performing causal
+analysis using propensity scores. We provide a list of several models to generate
+weights to use in causal inference for multivariate exposures, and test the balancing property of these weights
+using weighted Pearson correlations. In addition, returns the effective sample
+size.
 }
 \details{
 When using propensity score methods for causal inference it is crucial to
@@ -100,6 +104,15 @@ even a single confounder that is sufficiently out of balance can reduce performa
 
 \emph{Average absolute correlation} is the sum of the exposure-confounder correlations.
 This metric summarizes how well, on average, the entire set of exposures is balanced.
+}
+
+\subsection{Effective Sample Size}{
+
+Effective sample size, ESS, is defined as
+\deqn{ESS=(\Sigma_i w_i)^{2}/\Sigma_i w_i^2,}
+where \eqn{w_i} are the estimated weights for a particular method \insertCite{kish_ess}{mvGPS}.
+Note that when \eqn{w=1} for all units that the \eqn{ESS} is equal to the sample size \eqn{n}.
+\eqn{ESS} decreases when there are extreme weights or high variability in the weights.
 }
 }
 \references{
