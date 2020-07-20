@@ -160,6 +160,8 @@ mvGPS <- function(D, C, common=FALSE, trim_w=FALSE, trim_quantile=0.99){
 #' 
 #' @inheritParams mvGPS
 #' 
+#' @keywords internal
+#' 
 #' @importFrom stats quantile
 D_C_check <- function(D, C, common){
     D <- as.matrix(D)

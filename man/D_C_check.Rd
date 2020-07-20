@@ -23,3 +23,4 @@ as list of confounders of length \eqn{m}.}
 Internal function for formatting and checking specification of exposures and
 confounders
 }
+\keyword{internal}

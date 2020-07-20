@@ -16,7 +16,7 @@ bal(
 }
 \arguments{
 \item{model_list}{character string identifying which methods to use when
-constructing weights. See details for a list of appropriate models}
+constructing weights. See details for a list of available models}
 
 \item{D}{numeric matrix of dimension \eqn{n} by \eqn{m} designating values of the exposures}
 
@@ -29,7 +29,7 @@ value or if \code{common} is TRUE a single matrix of of dimension \eqn{n} by
 confounders for all exposures. default is FALSE meaning C must be specified
 as list of confounders of length \eqn{m}.}
 
-\item{trim_w}{logical indicator for whether to trim weights for mvGPS method. default is FALSE}
+\item{trim_w}{logical indicator for whether to trim weights. default is FALSE}
 
 \item{trim_quantile}{numeric scalar used to specify the upper quantile to
 trim weights if applicable. default is 0.99}
@@ -38,10 +38,71 @@ trim weights if applicable. default is 0.99}
 in model_list will be estimated for each exposure. If FALSE will only estimate weights
 for the first exposure}
 }
+\value{
+\itemize{
+\item \code{W}: list of weights generated for each model
+\item \code{cor_list}: list of weighted Pearson correlation coefficients for all confounders specified
+\item \code{bal_metrics}: data.frame with the Euclidean distance, maximum absolute correlation, and average absolute correlation by method
+\item \code{ess}: effective sample size for each of the methods used to generate weights
+\item \code{models}: vector of models used
+}
+}
 \description{
 Construct Covariate Balance Statistics for Models with Multivariate Exposure
 }
 \details{
 When using propensity score methods for causal inference it is crucial to
-check the balancing property of the covariates and exposure(s).
+check the balancing property of the covariates and exposure(s). To do this in
+the multivariate case we first use a weight generating method from the available
+list shown below.
+
+\subsection{Methods Available}{
+
+\itemize{
+\item "mvGPS": Multivariate generalized propensity score using Gaussian densities
+\item "entropy": Estimating weights using entropy loss
+function without specifying propensity score \insertCite{tbbicke2020entropy}{mvGPS}
+\item "CBPS": Covariate balancing propensity score for continuous treatments
+which adds balance penalty while solving for propensity score parameters \insertCite{fong2018}{mvGPS}
+\item "PS": Generalized propensity score estimated using univariate Gaussian densities
+\item "GBM": Gradient boosting to estimate the mean function of the propensity score,
+but still maintains Gaussian distributional assumptions \insertCite{zhu_boosting}{mvGPS}
+}
+
+Note that only the \code{mvGPS} method is multivariate and all others are strictly univariate.
+For univariate methods weights are estimated for each exposure separately
+using the \code{\link[WeightIt]{weightit}} function given the
+confounders for that exposure in \code{C} when \code{all_uni=TRUE}. To estimate
+weights for only the first exposure set \code{all_uni=FALSE}.
+}
+
+It is also important to note that the weights for each method can be trimmed at
+the desired quantile by setting \code{trim_w=TRUE} and setting \code{trim_quantile}
+in [0.5, 1]. Trimming is done at both the upper and lower bounds. For further details
+see \code{\link[mvGPS]{mvGPS}} on how trimming is performed.
+
+\subsection{Balance Metrics}{
+
+In this package we include three key balancing metrics to summarize balance
+across all of the exposures.
+\itemize{
+\item Euclidean distance
+\item Maximum absolute correlation
+\item Average absolute correlation
+}
+\emph{Euclidean distance} is calculated using the origin point as reference, e.g. for \code{m=2}
+exposures the reference point is [0, 0]. In this way we are calculating how far
+the observed set of correlation points are from perfect balance.
+
+\emph{Maximum absolute correlation} reports the largest single imbalance between
+the exposures and the set of confounders. It is often a key diagnostic as
+even a single confounder that is sufficiently out of balance can reduce performance.
+
+\emph{Average absolute correlation} is the sum of the exposure-confounder correlations.
+This metric summarizes how well, on average, the entire set of exposures is balanced.
+}
+}
+\references{
+\preformatted{\\insertAllCited\{\}
+}
 }
