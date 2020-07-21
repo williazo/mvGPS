@@ -562,13 +562,73 @@ exposure dimensions. In this case we can also note that the effective
 sample size after weighting 163.8253 is still sufficiently large that we
 not worried about loss of power.
 
-To further examine how the individual confounders are balanced for each
-method we can plot their Pearson correlations as shown in the
-interactive plot below.
+<!-- To further examine how the individual confounders are balanced for each method -->
 
-<iframe src="README_files/cov_balance.html" width="800" height="400" scrolling="yes" seamless="seamless" frameBorder="0">
+<!-- we can plot their Pearson correlations as shown in the interactive plot below. -->
 
-</iframe>
+<!-- ```{r 3dbalance, warning=FALSE, message=FALSE, echo=FALSE} -->
+
+<!-- require(plotly) -->
+
+<!-- require(stringr) -->
+
+<!-- require(tidyr) -->
+
+<!-- cor_list <- bal_results$cor_list -->
+
+<!-- cor_df <- data.frame(cor=unlist(cor_list, recursive=TRUE)) -->
+
+<!-- cor_df$desc <- row.names(cor_df) -->
+
+<!-- desc_split <- str_split(cor_df$desc, "\\.") -->
+
+<!-- method <- unlist(lapply(desc_split, function(x) x[[1]])) -->
+
+<!-- exp <- unlist(lapply(desc_split, function(x) gsub("_cor", "", x[[2]]))) -->
+
+<!-- confounder <- unlist(lapply(desc_split, function(x) paste0("C", x[[3]]))) -->
+
+<!-- cor_df <- data.frame(cor_df, method=method, exp=exp, confounder=confounder) -->
+
+<!-- cor_df_wide <- pivot_wider(cor_df[, c("cor", "method", "exp", "confounder")], -->
+
+<!--                            id_cols=c("method", "confounder"), names_from="exp", -->
+
+<!--                            values_from="cor") -->
+
+<!-- cor_df_wide[is.na(cor_df_wide)] <- 0 -->
+
+<!-- #setting covariates that were not used for one exposure to 0 by default so that  -->
+
+<!-- #they appear in the plot -->
+
+<!-- fig <- plot_ly(data=subset(cor_df_wide, method=="mvGPS"), x=~D1, y=~D2, z=~confounder, color=~method, -->
+
+<!--         marker=list(size=5), type="scatter3d", mode="markers+lines",  -->
+
+<!--         hovertemplate = paste('<i>D1 Pearson Correlation</i>: %{x:.4f}', -->
+
+<!--                               '<br><i>D2 Pearson Correlation</i>: %{y:.4f}', -->
+
+<!--                               '<br><b>Covariate</b>: %{z}')) %>% -->
+
+<!--     add_trace(data=subset(cor_df_wide, method=="unweighted")) %>% -->
+
+<!--     add_trace(data=subset(cor_df_wide, !method%in%c("unweighted", "mvGPS")), -->
+
+<!--               visible="legendonly") %>% -->
+
+<!--     layout(title=list(text="Covariate Balancing"), -->
+
+<!--                scene = list(xaxis = list(title="D1-Covariate Correlation", text="D1"), -->
+
+<!--                             yaxis = list(title="D2-Covariate Correlation", text="D2"), -->
+
+<!--                             zaxis = list(title="Covariates"))) -->
+
+<!-- htmlwidgets::saveWidget(partial_bundle(fig), file=file.path(getwd(), "README_files/cov_balance.html")) -->
+
+<!-- ``` -->
 
 ### Bias Reduction
 
