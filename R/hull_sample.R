@@ -19,7 +19,30 @@
 #' 
 #' @details 
 #' Assume that \eqn{X} is an \eqn{n\times m} matrix representing the multivariate
-#' exposure of interest. We can 
+#' exposure of interest. We can define the convex hull of these observations as
+#' \strong{H}. There are two distinct processes for defining \strong{H} depending
+#' on whether \eqn{m=2} or \eqn{m>2}.
+#' 
+#' If \eqn{m=2}, we use the \code{\link[grDevices]{chull}} function to define the 
+#' vertices of the convex hull. The algorithm implemented is described in \insertCite{eddy1977new;textual}{mvGPS}.
+#' 
+#' If \eqn{m>2}, we use the \code{\link[geometry]{convhulln}} function. This algorithm 
+#' for obtaining the convex hull in m-dimensional space uses Qhull described in
+#' \insertCite{barber1996quickhull;textual}{mvGPS}. Currently this function returns
+#' only the vertex set \code{hpts_vs} without the grid sample points. There are
+#' options to visualize the convex hull when \eqn{m=3} using triangular facets,
+#' but there are no implementable solutions to sample along convex hulls in higher
+#' dimensions.
+#' 
+#' 
+#' @references
+#'     \insertAllCited{}
+#' 
+#' @return 
+#' \itemize{
+#' \item \code{hpts_vs}: vertices of the convex hull in m-dimensional space
+#' \item \code{grid_pts}: values of grid points sampled over the corresponding convex hull
+#' }
 #' 
 #' @export
 hull_sample <- function(X,  num_grid_pts=500, trim_hull=FALSE, trim_quantile=NULL){
@@ -38,7 +61,6 @@ hull_sample <- function(X,  num_grid_pts=500, trim_hull=FALSE, trim_quantile=NUL
         colnames(X_trim) <- colnames(X)
         X <- na.omit(X_trim)
     }
-    
     if(m==2){
         #special base operations to use if operating in two dimensional space
         hpts <-chull(X) #coordinates for the convex hull
@@ -57,7 +79,14 @@ hull_sample <- function(X,  num_grid_pts=500, trim_hull=FALSE, trim_quantile=NUL
         
     } else {
         hpts <- geometry::convhulln(X)
-        ## need to come back and work on this process when dimension is greater than 2
+        #returns an n times m matrix where each row contains indices used to form facets
+        hpts_ind <- unique(c(hpts))
+        #selecting all of the unique row indices as this will form the vertex set
+        hpts_vs <- X[hpts_ind, ]
+        #subsetting the original data to form the vertex set
+        #NOTE: this vertex set is not ordered like the case of m=2
+        grid_pts <- NULL
+        #need to investigate ways to sample along m-dimensional object formed using vertex set
     }
     return(list(hpts_vs=hpts_vs, grid_pts=grid_pts))
 }

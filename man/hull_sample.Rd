@@ -17,6 +17,12 @@ search for over the convex hull. Default is 500.}
 \item{trim_quantile}{numeric scalar between [0.5, 1] representing the
 quantile value to trim the convex hull. Only used if trim_hull is set to TRUE.}
 }
+\value{
+\itemize{
+\item \code{hpts_vs}: vertices of the convex hull in m-dimensional space
+\item \code{grid_pts}: values of grid points sampled over the corresponding convex hull
+}
+}
 \description{
 To define a proper estimable region with multivariate exposure we construct
 a convex hull of the data in order to maintain the positivity identifying assumption.
@@ -25,5 +31,22 @@ restrict to high density regions in multidimensional space.
 }
 \details{
 Assume that \eqn{X} is an \eqn{n\times m} matrix representing the multivariate
-exposure of interest. We can
+exposure of interest. We can define the convex hull of these observations as
+\strong{H}. There are two distinct processes for defining \strong{H} depending
+on whether \eqn{m=2} or \eqn{m>2}.
+
+If \eqn{m=2}, we use the \code{\link[grDevices]{chull}} function to define the
+vertices of the convex hull. The algorithm implemented is described in \insertCite{eddy1977new;textual}{mvGPS}.
+
+If \eqn{m>2}, we use the \code{\link[geometry]{convhulln}} function. This algorithm
+for obtaining the convex hull in m-dimensional space uses Qhull described in
+\insertCite{barber1996quickhull;textual}{mvGPS}. Currently this function returns
+only the vertex set \code{hpts_vs} without the grid sample points. There are
+options to visualize the convex hull when \eqn{m=3} using triangular facets,
+but there are no implementable solutions to sample along convex hulls in higher
+dimensions.
+}
+\references{
+\preformatted{\\insertAllCited\{\}
+}
 }

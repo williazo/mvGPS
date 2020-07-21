@@ -18,9 +18,13 @@ test_that("Argument check", {
     
     #specifying only a single exposure value with matrix
     expect_error(hull_sample(D[, 1]), "Exposure is not multivariate")
-    
     #specifying only a single exposure value with data.frame
     expect_error(hull_sample(dt[, 1]), "Exposure is not multivariate")
+    
+    #specifying trim_hull but no quantile
+    expect_error(hull_sample(D, trim_hull=TRUE), "trim_hull set to TRUE but trim_quantile not specified.")
+    #improperly specifying trim_quantile value
+    expect_error(hull_sample(D, trim_hull=TRUE, trim_quantile=0.01), "trim_quantile must be between [0.5, 1]", fixed=TRUE)
 })
 
 test_that("Performance check", {
@@ -32,4 +36,13 @@ test_that("Performance check", {
     df2 <- hull_sample(dt[, 1:2])
     expect_named(df2, c("hpts_vs", "grid_pts"))
     
+    #matrix of dimension 3
+    mat3 <- hull_sample(D)
+    expect_named(mat3, c("hpts_vs", "grid_pts"))
+    expect_null(mat3$grid_pts)
+    
+    #data.frame of dimension 3
+    df3 <- hull_sample(dt)
+    expect_named(df3, c("hpts_vs", "grid_pts"))
+    expect_null(df3$grid_pts)
 })
