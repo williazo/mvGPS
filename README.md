@@ -818,7 +818,7 @@ bbox_df_trim <- data.frame(D1=c(bbox_grid_trim[1, 1], bbox_grid_trim[1, 2],
                                 bbox_grid_trim[1, 2], bbox_grid_trim[1, 1]), 
                            D2=c(bbox_grid_trim[2, 1], bbox_grid_trim[2, 1], 
                                 bbox_grid_trim[2, 2], bbox_grid_trim[2, 2]))
-chull <- ggplot(data=data.frame(D), aes(x=D1, D2))+
+chull_plot <- ggplot(data=data.frame(D), aes(x=D1, D2))+
     geom_point()+
     geom_polygon(data=data.frame(chull_D$hpts_vs), color="indianred4", fill=NA)+
     geom_polygon(data=data.frame(chull_D_trim$hpts_vs), color="indianred1", fill=NA, alpha=0.4)+
@@ -827,7 +827,7 @@ chull <- ggplot(data=data.frame(D), aes(x=D1, D2))+
     xlab("D1")+
     ylab("D2")+
     theme_bw()
-chull
+chull_plot
 ```
 
 <img src="README_files/figure-gfm/chull_plot-1.png" width="50%" style="display: block; margin: auto;" />
@@ -844,6 +844,10 @@ in the product range domain.
 
 ### Dose-Response Surface
 
-``` r
-# <- predict(chull_D$grid_pts, )
-```
+When exposure is bivariate, the resulting dose-response function is a
+surface. Using the weighted regression model described above to
+incorporate the weights, we can predict across our convex hull domain to
+gain intuition about how altering the exposures effects the outcome of
+interest. To see an example of this type of dose-response surface on an
+application to analyzing obesity intervention programs in Los Angeles
+County visit <https://williazo.github.io/resources/>.
