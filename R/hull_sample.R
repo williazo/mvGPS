@@ -34,6 +34,17 @@
 #' but there are no implementable solutions to sample along convex hulls in higher
 #' dimensions.
 #' 
+#' To restrict the convex hull to higher density regions of the exposure we can 
+#' apply trimming. To apply trimming set \code{trim_hull=TRUE} and specify 
+#' \code{trim_quantile=q} where \code{q} must be in \[0.5, 1\]. Along each
+#' exposure dimension we then calculate the upper and lower bounds using the 
+#' \code{\link[stats]{quantile}} function, i.e., \code{quantile(q)} and 
+#' \code{quantile(1-q)}. Any observations that have a value above or below these
+#' sample quantiles is excluded. The remaining observations that fall completely 
+#' within the sample quantiles across all dimensions are used to estimate the 
+#' convex hull. We return \code{X} that represents the observations used. 
+#' If \code{trim_hull=FALSE}, then \code{X} is unchanged. However, if trimming
+#' is applied then \code{X} contains only the remaining observations after trimming.
 #' 
 #' @references
 #'     \insertAllCited{}
@@ -42,6 +53,7 @@
 #' \itemize{
 #' \item \code{hpts_vs}: vertices of the convex hull in m-dimensional space
 #' \item \code{grid_pts}: values of grid points sampled over the corresponding convex hull
+#' \item \code{X}: data used to generate convex hull which may be trimmed
 #' }
 #' 
 #' @export
@@ -55,8 +67,8 @@ hull_sample <- function(X,  num_grid_pts=500, trim_hull=FALSE, trim_quantile=NUL
         trim_upper <- apply(X, 2, quantile, trim_quantile)
         trim_lower <- apply(X, 2, quantile, 1 - trim_quantile)
         X_trim <- sapply(seq_len(m), function(x){
-            ifelse(X[, x]>trim_upper[x], NA, 
-                   ifelse( X[, x]<trim_lower[x], NA, X[, x]))
+            ifelse(X[, x] > trim_upper[x], NA, 
+                   ifelse(X[, x] < trim_lower[x], NA, X[, x]))
         })
         colnames(X_trim) <- colnames(X)
         X <- na.omit(X_trim)
@@ -66,17 +78,15 @@ hull_sample <- function(X,  num_grid_pts=500, trim_hull=FALSE, trim_quantile=NUL
         hpts <-chull(X) #coordinates for the convex hull
         hpts <- c(hpts, hpts[1]) #closing the set
         hpts_vs <- as.matrix(X[hpts, ]) #vertices of the convex hull
+        
         m <- Polygon(hpts_vs)
         # wrap Polygon into Polygons object
         ps <- Polygons(list(m), 1)
-        
         # wrap Polygons object into SpatialPolygons object
         sps <- SpatialPolygons(list(ps))
-        
         #sampling regular points along grid of polygon
         sp_grid_pts <- spsample(sps, n=num_grid_pts, type="regular")
         grid_pts <- coordinates(sp_grid_pts)
-        
     } else {
         hpts <- geometry::convhulln(X)
         #returns an n times m matrix where each row contains indices used to form facets
@@ -88,7 +98,7 @@ hull_sample <- function(X,  num_grid_pts=500, trim_hull=FALSE, trim_quantile=NUL
         grid_pts <- NULL
         #need to investigate ways to sample along m-dimensional object formed using vertex set
     }
-    return(list(hpts_vs=hpts_vs, grid_pts=grid_pts))
+    return(list(hpts_vs=hpts_vs, grid_pts=grid_pts, X=X))
 }
 
 #' Checking that the exposure matrix is properly specified

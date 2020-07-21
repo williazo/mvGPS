@@ -30,19 +30,26 @@ test_that("Argument check", {
 test_that("Performance check", {
     #matrix of dimension 2
     mat2 <- hull_sample(D[, 1:2])
-    expect_named(mat2, c("hpts_vs", "grid_pts"))
+    expect_named(mat2, c("hpts_vs", "grid_pts", "X"))
     
     #data.frame of dimension 2
     df2 <- hull_sample(dt[, 1:2])
-    expect_named(df2, c("hpts_vs", "grid_pts"))
+    expect_named(df2, c("hpts_vs", "grid_pts", "X"))
     
     #matrix of dimension 3
     mat3 <- hull_sample(D)
-    expect_named(mat3, c("hpts_vs", "grid_pts"))
+    expect_named(mat3, c("hpts_vs", "grid_pts", "X"))
     expect_null(mat3$grid_pts)
     
     #data.frame of dimension 3
     df3 <- hull_sample(dt)
-    expect_named(df3, c("hpts_vs", "grid_pts"))
+    expect_named(df3, c("hpts_vs", "grid_pts", "X"))
     expect_null(df3$grid_pts)
+    
+    #proper trimming check
+    df3_trim <- hull_sample(dt, trim_hull=TRUE, trim_quantile=0.99)
+    expect_named(df3_trim, c("hpts_vs", "grid_pts", "X"))
+    expect_null(df3_trim$grid_pts)
+    expect_true(all(apply(dt, 2, quantile, 0.99) >= apply(df3_trim$X, 2, max)))
+    expect_true(all(apply(dt, 2, quantile, 1- 0.99) <= apply(df3_trim$X, 2, min)))
 })
