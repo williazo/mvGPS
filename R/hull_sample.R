@@ -87,6 +87,7 @@ hull_sample <- function(X,  num_grid_pts=500, trim_hull=FALSE, trim_quantile=NUL
         #sampling regular points along grid of polygon
         sp_grid_pts <- spsample(sps, n=num_grid_pts, type="regular")
         grid_pts <- coordinates(sp_grid_pts)
+        colnames(grid_pts) <- colnames(X)
     } else {
         hpts <- geometry::convhulln(X)
         #returns an n times m matrix where each row contains indices used to form facets
