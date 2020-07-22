@@ -98,12 +98,12 @@ of confounders \code{C} we have the following three methods:
 
 "matrix_normal" uses the function \code{\link[matrixNormal]{rmatnorm}} to
 generate all \code{n} samples as
-\deqn{\mathbf{D}\mid\mathbf{C}\sim N_{n x 2}(\boldsymbol{\beta}\mathbf{C}), \mathbf{I}_{n}, \Omega}
+\deqn{\mathbf{D}\mid\mathbf{C}\sim N_{n \times 2}(\boldsymbol{\beta}\mathbf{C}, \mathbf{I}_{n}, \Omega)}
 where \eqn{\boldsymbol{\beta}} is a column vector containing \eqn{\boldsymbol{\beta}^{T}_{D1}}
 and \eqn{\boldsymbol{\beta}^{T}_{D2}}, and \eqn{\Omega} is the conditional covariance matrix.
 
 "vector_normal" simply vectorizes the matrix_normal method above to generate
-a vector of length \code{n x 2}.
+a vector of length \eqn{n \times 2}.
 
 "uni_cond" specifies the bivariate exposure using univariate conditional
 factorization, which in the case of bivariate normal results in two univariate
@@ -120,8 +120,8 @@ uniquely using either "m", "u", or "v".
 
 As described above the exposures are drawn conditional on the set \code{C},
 so the marginal covariance of exposures is defined as
-\deqn{\Sigma_{D}=\boldsymol{\beta}\Sigma_{C},\boldsymbol{\beta}^{T} + \Omega.}
+\deqn{\Sigma_{D}= \boldsymbol{\beta}\Sigma_{C}\boldsymbol{\beta}^{T}+\Omega.}
 In our function we return the true marginal covariance \eqn{\Sigma_{D}} as well
-as the true marginal correlation \eqn{rho_{D}}.
+as the true marginal correlation \eqn{\rho_{D}}.
 }
 }
