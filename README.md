@@ -40,18 +40,29 @@ To generate this data we first draw *n*=200 samples from **C** assuming
 a multivariate normal distribution with mean equal to zero, variance
 equal to 1, and constant covariance of 0.1.
 
-``` r
-require(MASS)
-require(matrixNormal)
-set.seed(06112020)
-n <- 200
-C_mu <- rep(0, 3)
-C_cov <- 0.1
-#generating the covariance matrix of 
-C_Sigma <- I(3) + ((J(3) - I(3)) * C_cov)
-#drawing our observed samples
-C <- MASS::mvrnorm(n, mu=C_mu, Sigma=C_Sigma)
-```
+<!-- ```{r sample_C, message=FALSE, warning=FALSE} -->
+
+<!-- require(MASS) -->
+
+<!-- require(matrixNormal) -->
+
+<!-- set.seed(06112020) -->
+
+<!-- n <- 200 -->
+
+<!-- C_mu <- rep(0, 3) -->
+
+<!-- C_cov <- 0.1 -->
+
+<!-- #generating the covariance matrix of  -->
+
+<!-- C_Sigma <- I(3) + ((J(3) - I(3)) * C_cov) -->
+
+<!-- #drawing our observed samples -->
+
+<!-- C <- MASS::mvrnorm(n, mu=C_mu, Sigma=C_Sigma) -->
+
+<!-- ``` -->
 
 Next we define our exposure as a linear function of our confounders.
 Explicitly these two equations are defined as
@@ -66,28 +77,15 @@ confounders vary for each exposure. We assume that the conditional
 distribution of **D** given **C** is bivariate normal with conditional
 correlation equal to 0.2 and conditional variance equal to 2.
 
+To generate the set of confounders and the corresponding bivariate
+exposure we can use the function `gen_D()` as shown below.
+
 ``` r
-s_d1_cond <- 2
-s_d2_cond <- 2
-s_d_cond <- c(s_d1_cond, s_d2_cond)
-rho_cond <- 0.2
-
-d1_beta <- c(0.5, 1, 0) #exposure D1 effect of C1 and C2
-d2_beta <- c(0, 0.3, 0.75) #exposure D2 effect of C2 and C3
-d_beta <- cbind(d1_beta, d2_beta)
-d_xbeta <- C %*% d_beta #constructing the conditional mean expression
-d1_xbeta <- d_xbeta[, 1]
-d2_xbeta <- d_xbeta[, 2]
-
-#construction conditional covariance matrix
-D_corr_cond <- I(2) + matrix(c(0, rho_cond, rho_cond, 0), nrow=2, ncol=2, byrow=TRUE)
-D_Sigma_cond <- outer(s_d_cond, s_d_cond) * D_corr_cond
-
-#drawing bivariate exposure
-D1 <- rnorm(n, d1_xbeta, s_d1_cond)
-D2 <- rnorm(n, d2_xbeta + (s_d2_cond / s_d1_cond) * rho_cond * (D1 - d1_xbeta), 
-            sqrt((1 - rho_cond^2) * s_d2_cond^2))
-D <- cbind(D1, D2)
+sim_dt <- gen_D(method="u", n=200, rho_cond=0.2, s_d1_cond=2, s_d2_cond=2, k=3, 
+                C_mu=rep(0, 3), C_cov=0.1, C_var=1, 
+                d1_beta=c(0.5, 1, 0), d2_beta=c(0, 0.3, 0.75), seed=06112020)
+D <- sim_dt$D
+C <- sim_dt$C
 ```
 
 By construction our marginal correlation of D is a function of
@@ -110,7 +108,7 @@ deviation of our outcome is set equal 2.
 alpha <- c(0.75, 1, 0.6, 1, 1)
 sd_Y <- 2
 X <- cbind(C, D)
-Y <- X%*%alpha + rnorm(n, sd=sd_Y)
+Y <- X%*%alpha + rnorm(200, sd=sd_Y)
 ```
 
 ### Generating Weights
@@ -242,40 +240,6 @@ Method
 <td style="text-align:left;">
 
 mvGPS
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:right;">
-
-0.2142
-
-</td>
-
-<td style="text-align:right;">
-
-0.2044
-
-</td>
-
-<td style="text-align:right;">
-
-0.0672
-
-</td>
-
-<td style="text-align:right;">
-
-161.8505
-
-</td>
-
-<td style="text-align:left;">
-
-CBPS\_D1
 
 </td>
 
@@ -421,31 +385,31 @@ entropy\_D1
 
 <td style="text-align:right;">
 
-0.3121
+0.2843
 
 </td>
 
 <td style="text-align:right;">
 
-0.2403
+0.2400
 
 </td>
 
 <td style="text-align:right;">
 
-0.1099
+0.1236
 
 </td>
 
 <td style="text-align:right;">
 
-173.4609
+184.3871
 
 </td>
 
 <td style="text-align:left;">
 
-CBPS\_D2
+CBPS\_D1
 
 </td>
 
@@ -548,6 +512,40 @@ GBM\_D2
 <td style="text-align:left;">
 
 unweighted
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:right;">
+
+1.1022
+
+</td>
+
+<td style="text-align:right;">
+
+0.6701
+
+</td>
+
+<td style="text-align:right;">
+
+0.5012
+
+</td>
+
+<td style="text-align:right;">
+
+50.2385
+
+</td>
+
+<td style="text-align:left;">
+
+CBPS\_D2
 
 </td>
 
