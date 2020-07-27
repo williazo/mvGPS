@@ -81,6 +81,7 @@ To generate the set of confounders and the corresponding bivariate
 exposure we can use the function `gen_D()` as shown below.
 
 ``` r
+require(mvGPS)
 sim_dt <- gen_D(method="u", n=200, rho_cond=0.2, s_d1_cond=2, s_d2_cond=2, k=3, 
                 C_mu=rep(0, 3), C_cov=0.1, C_var=1, 
                 d1_beta=c(0.5, 1, 0), d2_beta=c(0, 0.3, 0.75), seed=06112020)
@@ -632,22 +633,19 @@ not worried about loss of power.
 
 Finally, we want to check that these weights are properly reducing the
 bias when we estimate the exposure treatment effect. To do this we will
-use the function. To do this we can construct a weighted least squares
-regression.
+use the function `mvGPS.fit()`.
 
 ``` r
-dt <- data.frame(Y, D, w=w)
-#using mvGPS weights
-wls_mod <- lm(Y ~ D1 + D2, weights=w, data=dt)
-mvGPS_tx_hat <- coef(wls_mod)[c("D1", "D2")]
+dt <- data.frame(Y, D)
+wls_mods <- mvGPS.fit(Y ~ D1 + D2, W=bal_results$W, data=dt)
+wls_coefs <- lapply(wls_mods, function(x) coef(x)[c("XD1", "XD2")])
+wls_hat<- do.call(cbind, wls_coefs)
 
-#unadjusted estimates for treatment effects
-unadj_mod <- lm(Y ~ D1 + D2, data=dt)
-unadj_tx_hat <- coef(unadj_mod)[c("D1", "D2")]
+unadj_hat <- coef(lm(Y ~ D1 + D2, data=dt))[c("D1", "D2")]
 
-bias_tbl <- cbind(truth=c(1, 1), mvGPS=mvGPS_tx_hat, unadj=unadj_tx_hat)
+bias_tbl <- cbind(truth=c(1, 1), unadj=unadj_hat, wls_hat)
 kable(bias_tbl, digits=2, row.names=TRUE, 
-             col.names=c("Truth", "mvGPS", "Unadjusted"))
+             col.names=c("Truth", "Unadjusted", colnames(wls_hat)))
 ```
 
 <table>
@@ -668,13 +666,61 @@ Truth
 
 <th style="text-align:right;">
 
+Unadjusted
+
+</th>
+
+<th style="text-align:right;">
+
 mvGPS
 
 </th>
 
 <th style="text-align:right;">
 
-Unadjusted
+entropy\_D1
+
+</th>
+
+<th style="text-align:right;">
+
+entropy\_D2
+
+</th>
+
+<th style="text-align:right;">
+
+CBPS\_D1
+
+</th>
+
+<th style="text-align:right;">
+
+CBPS\_D2
+
+</th>
+
+<th style="text-align:right;">
+
+PS\_D1
+
+</th>
+
+<th style="text-align:right;">
+
+PS\_D2
+
+</th>
+
+<th style="text-align:right;">
+
+GBM\_D1
+
+</th>
+
+<th style="text-align:right;">
+
+GBM\_D2
 
 </th>
 
@@ -700,13 +746,61 @@ D1
 
 <td style="text-align:right;">
 
+1.28
+
+</td>
+
+<td style="text-align:right;">
+
 1.12
 
 </td>
 
 <td style="text-align:right;">
 
-1.28
+1.01
+
+</td>
+
+<td style="text-align:right;">
+
+1.26
+
+</td>
+
+<td style="text-align:right;">
+
+1.11
+
+</td>
+
+<td style="text-align:right;">
+
+1.11
+
+</td>
+
+<td style="text-align:right;">
+
+1.09
+
+</td>
+
+<td style="text-align:right;">
+
+1.27
+
+</td>
+
+<td style="text-align:right;">
+
+1.12
+
+</td>
+
+<td style="text-align:right;">
+
+1.27
 
 </td>
 
@@ -728,13 +822,61 @@ D2
 
 <td style="text-align:right;">
 
+1.18
+
+</td>
+
+<td style="text-align:right;">
+
 1.05
 
 </td>
 
 <td style="text-align:right;">
 
-1.18
+1.13
+
+</td>
+
+<td style="text-align:right;">
+
+1.06
+
+</td>
+
+<td style="text-align:right;">
+
+1.15
+
+</td>
+
+<td style="text-align:right;">
+
+1.78
+
+</td>
+
+<td style="text-align:right;">
+
+1.15
+
+</td>
+
+<td style="text-align:right;">
+
+1.07
+
+</td>
+
+<td style="text-align:right;">
+
+1.12
+
+</td>
+
+<td style="text-align:right;">
+
+1.08
 
 </td>
 
