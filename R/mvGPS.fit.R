@@ -37,9 +37,10 @@ mvGPS.fit <- function(formula, W, data = sys.frame(sys.parent())){
     if(!all(W_length==n)) stop("all weights in W must be same length as number of units in exposure and confounders", call.=FALSE)
 
     #fitting an unadjusted model which accounts does not have any weights or control for confounders
-    unadj_mod <- lm(Y~X)
+    unadj_mod <- lm(Y ~ X - 1)
     
-    mod_fit <- lapply(W, function(wts) lm(Y~X, weights=wts))
+    mod_fit <- lapply(W, function(wts) lm(Y ~ X - 1, weights=wts))
+    # mod_fit <- lapply(W, function(wts) gls(model=formula, data=mf, weights=varFunc(~wts)))
     #adding the unadjusted model
     mod_fit[["unweighted"]] <- list(mod=unadj_mod)
     
