@@ -11,7 +11,8 @@ bal(
   common = FALSE,
   trim_w = FALSE,
   trim_quantile = 0.99,
-  all_uni = TRUE
+  all_uni = TRUE,
+  ...
 )
 }
 \arguments{
@@ -37,6 +38,9 @@ trim weights if applicable. default is 0.99}
 \item{all_uni}{logical indicator. If TRUE then all univariate models specified
 in model_list will be estimated for each exposure. If FALSE will only estimate weights
 for the first exposure}
+
+\item{...}{additional arguments to pass to \code{\link[WeightIt]{weightit}} function
+if specifying one of these models in the model_list}
 }
 \value{
 \itemize{

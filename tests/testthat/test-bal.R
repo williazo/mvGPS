@@ -44,4 +44,8 @@ test_that("Argument check", {
     
     #there is an additional warning whenever GBM is used
     expect_warning(bal(model_list=c("GBM"), D=D, C=C))
+    
+    #checking passing options to weightit functions. here we expect the GBM function to not have an error
+    expect_warning(bal(model_list=c("GBM"), D=D, C=C, stop.method="p.mean"), regexp=NA)
+    
 })

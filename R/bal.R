@@ -12,6 +12,8 @@
 #' @param all_uni logical indicator. If TRUE then all univariate models specified
 #' in model_list will be estimated for each exposure. If FALSE will only estimate weights
 #' for the first exposure
+#' @param ... additional arguments to pass to \code{\link[WeightIt]{weightit}} function
+#' if specifying one of these models in the model_list
 #' 
 #' @import WeightIt 
 #' @import cobalt
@@ -94,7 +96,7 @@
 #'
 #' @export
 #'
-bal <- function(model_list, D, C, common=FALSE, trim_w=FALSE, trim_quantile=0.99, all_uni=TRUE){
+bal <- function(model_list, D, C, common=FALSE, trim_w=FALSE, trim_quantile=0.99, all_uni=TRUE, ...){
     check_result <- D_C_check(D, C, common)
     assign("D", check_result$D)
     assign("C", check_result$C)
@@ -118,7 +120,7 @@ bal <- function(model_list, D, C, common=FALSE, trim_w=FALSE, trim_quantile=0.99
        } else { #all other methods use the weightit function
            if(all_uni==TRUE){
                w <- lapply(seq_len(m), function(d){
-                   w <- weightit(D[, d]~C[[d]], method=mod)
+                   w <- weightit(D[, d]~C[[d]], method=mod, ...)
                    w <- w$weights
                    if(trim_w==TRUE){
                        #trimming the large weights
