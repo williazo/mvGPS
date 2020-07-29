@@ -26,10 +26,10 @@ mvGPS.fit <- function(formula, W, data = sys.frame(sys.parent())){
     } else if (length(formula) != 3){
         stop("formula must be 2-sided", call. = FALSE)
     }
+    mf <- model.frame(formula, data)
     #outcome vector
-    Y <- model.frame(formula, data)[, 1]
-    #design matrix
-    X <- model.matrix(formula, data)
+    Y <- mf[, 1]
+    #number of obs
     n <- length(Y)
     
     W <- as.list(W)
@@ -37,10 +37,9 @@ mvGPS.fit <- function(formula, W, data = sys.frame(sys.parent())){
     if(!all(W_length==n)) stop("all weights in W must be same length as number of units in exposure and confounders", call.=FALSE)
 
     #fitting an unadjusted model which accounts does not have any weights or control for confounders
-    unadj_mod <- lm(Y ~ X - 1)
+    unadj_mod <- lm(mf)
     
-    mod_fit <- lapply(W, function(wts) lm(Y ~ X - 1, weights=wts))
-    # mod_fit <- lapply(W, function(wts) gls(model=formula, data=mf, weights=varFunc(~wts)))
+    mod_fit <- lapply(W, function(wts) lm(mf, weights=wts))
     #adding the unadjusted model
     mod_fit[["unweighted"]] <- list(mod=unadj_mod)
     

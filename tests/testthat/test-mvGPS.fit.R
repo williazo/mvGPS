@@ -31,4 +31,5 @@ test_that("Performance check", {
     rslt <- mvGPS.fit(formula=Y~D1+D2+D3, W=W, data=dt)
     expect_equal(length(rslt), length(W) + 1)
     expect_named(rslt, c(names(W), "unweighted"))
+    expect_named(coef(rslt[[1]]), c("(Intercept)", colnames(D)))
 })
