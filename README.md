@@ -540,8 +540,7 @@ not worried about loss of power.
 ### Bias Reduction
 
 Finally, we want to check that these weights are properly reducing the
-bias when we estimate the exposure treatment effect. To do this we will
-use the function `mvGPS.fit()`.
+bias when we estimate the exposure treatment effect.
 
 ``` r
 dt <- data.frame(Y, D)
