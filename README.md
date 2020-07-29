@@ -40,30 +40,6 @@ To generate this data we first draw *n*=200 samples from **C** assuming
 a multivariate normal distribution with mean equal to zero, variance
 equal to 1, and constant covariance of 0.1.
 
-<!-- ```{r sample_C, message=FALSE, warning=FALSE} -->
-
-<!-- require(MASS) -->
-
-<!-- require(matrixNormal) -->
-
-<!-- set.seed(06112020) -->
-
-<!-- n <- 200 -->
-
-<!-- C_mu <- rep(0, 3) -->
-
-<!-- C_cov <- 0.1 -->
-
-<!-- #generating the covariance matrix of  -->
-
-<!-- C_Sigma <- I(3) + ((J(3) - I(3)) * C_cov) -->
-
-<!-- #drawing our observed samples -->
-
-<!-- C <- MASS::mvrnorm(n, mu=C_mu, Sigma=C_Sigma) -->
-
-<!-- ``` -->
-
 Next we define our exposure as a linear function of our confounders.
 Explicitly these two equations are defined as
 
@@ -561,74 +537,6 @@ exposure dimensions. In this case we can also note that the effective
 sample size after weighting 163.8253 is still sufficiently large that we
 not worried about loss of power.
 
-<!-- To further examine how the individual confounders are balanced for each method -->
-
-<!-- we can plot their Pearson correlations as shown in the interactive plot below. -->
-
-<!-- ```{r 3dbalance, warning=FALSE, message=FALSE, echo=FALSE} -->
-
-<!-- require(plotly) -->
-
-<!-- require(stringr) -->
-
-<!-- require(tidyr) -->
-
-<!-- cor_list <- bal_results$cor_list -->
-
-<!-- cor_df <- data.frame(cor=unlist(cor_list, recursive=TRUE)) -->
-
-<!-- cor_df$desc <- row.names(cor_df) -->
-
-<!-- desc_split <- str_split(cor_df$desc, "\\.") -->
-
-<!-- method <- unlist(lapply(desc_split, function(x) x[[1]])) -->
-
-<!-- exp <- unlist(lapply(desc_split, function(x) gsub("_cor", "", x[[2]]))) -->
-
-<!-- confounder <- unlist(lapply(desc_split, function(x) paste0("C", x[[3]]))) -->
-
-<!-- cor_df <- data.frame(cor_df, method=method, exp=exp, confounder=confounder) -->
-
-<!-- cor_df_wide <- pivot_wider(cor_df[, c("cor", "method", "exp", "confounder")], -->
-
-<!--                            id_cols=c("method", "confounder"), names_from="exp", -->
-
-<!--                            values_from="cor") -->
-
-<!-- cor_df_wide[is.na(cor_df_wide)] <- 0 -->
-
-<!-- #setting covariates that were not used for one exposure to 0 by default so that  -->
-
-<!-- #they appear in the plot -->
-
-<!-- fig <- plot_ly(data=subset(cor_df_wide, method=="mvGPS"), x=~D1, y=~D2, z=~confounder, color=~method, -->
-
-<!--         marker=list(size=5), type="scatter3d", mode="markers+lines",  -->
-
-<!--         hovertemplate = paste('<i>D1 Pearson Correlation</i>: %{x:.4f}', -->
-
-<!--                               '<br><i>D2 Pearson Correlation</i>: %{y:.4f}', -->
-
-<!--                               '<br><b>Covariate</b>: %{z}')) %>% -->
-
-<!--     add_trace(data=subset(cor_df_wide, method=="unweighted")) %>% -->
-
-<!--     add_trace(data=subset(cor_df_wide, !method%in%c("unweighted", "mvGPS")), -->
-
-<!--               visible="legendonly") %>% -->
-
-<!--     layout(title=list(text="Covariate Balancing"), -->
-
-<!--                scene = list(xaxis = list(title="D1-Covariate Correlation", text="D1"), -->
-
-<!--                             yaxis = list(title="D2-Covariate Correlation", text="D2"), -->
-
-<!--                             zaxis = list(title="Covariates"))) -->
-
-<!-- htmlwidgets::saveWidget(partial_bundle(fig), file=file.path(getwd(), "README_files/cov_balance.html")) -->
-
-<!-- ``` -->
-
 ### Bias Reduction
 
 Finally, we want to check that these weights are properly reducing the
@@ -637,15 +545,14 @@ use the function `mvGPS.fit()`.
 
 ``` r
 dt <- data.frame(Y, D)
-wls_mods <- mvGPS.fit(Y ~ D1 + D2, W=bal_results$W, data=dt)
-wls_coefs <- lapply(wls_mods, function(x) coef(x)[c("XD1", "XD2")])
-wls_hat<- do.call(cbind, wls_coefs)
+mvGPS_mod <- lm(Y ~ D1 + D2, weights=w, data=dt)
+mvGPS_hat <- coef(mvGPS_mod)[c("D1", "D2")]
 
 unadj_hat <- coef(lm(Y ~ D1 + D2, data=dt))[c("D1", "D2")]
 
-bias_tbl <- cbind(truth=c(1, 1), unadj=unadj_hat, wls_hat)
+bias_tbl <- cbind(truth=c(1, 1), unadj=unadj_hat, mvGPS_hat)
 kable(bias_tbl, digits=2, row.names=TRUE, 
-             col.names=c("Truth", "Unadjusted", colnames(wls_hat)))
+             col.names=c("Truth", "Unadjusted", "mvGPS"))
 ```
 
 <table>
@@ -673,54 +580,6 @@ Unadjusted
 <th style="text-align:right;">
 
 mvGPS
-
-</th>
-
-<th style="text-align:right;">
-
-entropy\_D1
-
-</th>
-
-<th style="text-align:right;">
-
-entropy\_D2
-
-</th>
-
-<th style="text-align:right;">
-
-CBPS\_D1
-
-</th>
-
-<th style="text-align:right;">
-
-CBPS\_D2
-
-</th>
-
-<th style="text-align:right;">
-
-PS\_D1
-
-</th>
-
-<th style="text-align:right;">
-
-PS\_D2
-
-</th>
-
-<th style="text-align:right;">
-
-GBM\_D1
-
-</th>
-
-<th style="text-align:right;">
-
-GBM\_D2
 
 </th>
 
@@ -756,54 +615,6 @@ D1
 
 </td>
 
-<td style="text-align:right;">
-
-1.01
-
-</td>
-
-<td style="text-align:right;">
-
-1.26
-
-</td>
-
-<td style="text-align:right;">
-
-1.11
-
-</td>
-
-<td style="text-align:right;">
-
-1.11
-
-</td>
-
-<td style="text-align:right;">
-
-1.09
-
-</td>
-
-<td style="text-align:right;">
-
-1.27
-
-</td>
-
-<td style="text-align:right;">
-
-1.12
-
-</td>
-
-<td style="text-align:right;">
-
-1.27
-
-</td>
-
 </tr>
 
 <tr>
@@ -829,54 +640,6 @@ D2
 <td style="text-align:right;">
 
 1.05
-
-</td>
-
-<td style="text-align:right;">
-
-1.13
-
-</td>
-
-<td style="text-align:right;">
-
-1.06
-
-</td>
-
-<td style="text-align:right;">
-
-1.15
-
-</td>
-
-<td style="text-align:right;">
-
-1.78
-
-</td>
-
-<td style="text-align:right;">
-
-1.15
-
-</td>
-
-<td style="text-align:right;">
-
-1.07
-
-</td>
-
-<td style="text-align:right;">
-
-1.12
-
-</td>
-
-<td style="text-align:right;">
-
-1.08
 
 </td>
 
