@@ -22,6 +22,22 @@
 #' @importFrom matrixNormal rmatnorm J I vec
 #' @importFrom stats rnorm cov2cor
 #' 
+#' @examples 
+#' #generate bivariate exposures. D1 confounded by C1 and C2. D2 by C2 and C3
+#' #uses univariate conditional normal to draw samples
+#' sim_dt <- gen_D(method="u", n=200, rho_cond=0.2, s_d1_cond=2, s_d2_cond=2, k=3, 
+#' C_mu=rep(0, 3), C_cov=0.1, C_var=1, d1_beta=c(0.5, 1, 0), d2_beta=c(0, 0.3, 0.75), seed=06112020)
+#' D <- sim_dt$D
+#' C <- sim_dt$C
+#' 
+#' #observed correlation should be close to true marginal value
+#' cor(D); sim_dt$rho
+#' 
+#' 
+#' #Use vector normal method instead of univariate method to draw samples
+#' sim_dt <- gen_D(method="v", n=200, rho_cond=0.2, s_d1_cond=2, s_d2_cond=2, k=3, 
+#' C_mu=rep(0, 3), C_cov=0.1, C_var=1, d1_beta=c(0.5, 1, 0), d2_beta=c(0, 0.3, 0.75), seed=06112020)
+#' 
 #' @details 
 #'  \subsection{Generating Confounders}{
 #'  

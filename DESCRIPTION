@@ -24,7 +24,8 @@ Imports:
     matrixNormal,
     geometry,
     sp,
-    gbm
+    gbm,
+    CBPS
 BugReports: https://github.com/williazo/mvGPS/issues
 URL: https://github.com/williazo/mvGPS
 Suggests: 

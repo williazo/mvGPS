@@ -37,10 +37,10 @@ test_that("Argument check", {
                         all_uni=FALSE, trim_w=TRUE)
     #checking the min and max trimming
     expect_equal(unname(unlist(lapply(out_uni$W, quantile, 0.99))),
-                 unname(unlist(lapply(out_uni_trim$W, max, 0.99))))
+                 unname(unlist(lapply(out_uni_trim$W, max))))
     
     expect_equal(unname(unlist(lapply(out_uni$W, quantile, 1-0.99))),
-                 unname(unlist(lapply(out_uni_trim$W, min, 0.99))))
+                 unname(unlist(lapply(out_uni_trim$W, min))))
     
     #there is an additional warning whenever GBM is used
     expect_warning(bal(model_list=c("GBM"), D=D, C=C))

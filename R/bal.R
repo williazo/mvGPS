@@ -18,6 +18,7 @@
 #' @import WeightIt 
 #' @import cobalt
 #' @import gbm
+#' @import CBPS
 #' 
 #' @details 
 #' When using propensity score methods for causal inference it is crucial to 
@@ -81,6 +82,34 @@
 #'  }
 #' 
 #' @importFrom stats quantile
+#' 
+#' @examples 
+#' #simulating data
+#' sim_dt <- gen_D(method="u", n=200, rho_cond=0.2, s_d1_cond=2, s_d2_cond=2, k=3, 
+#' C_mu=rep(0, 3), C_cov=0.1, C_var=1, d1_beta=c(0.5, 1, 0), d2_beta=c(0, 0.3, 0.75), seed=06112020)
+#' D <- sim_dt$D
+#' C <- sim_dt$C
+#' 
+#' #generating weights using mvGPS and potential univariate alternatives
+#' require(WeightIt)
+#' bal_sim <- bal(model_list=c("mvGPS", "entropy", "CBPS", "PS", "GBM"), D, 
+#' C=list(C[, 1:2], C[, 2:3]))
+#' 
+#' #overall summary statistics
+#' bal_sim$bal_metrics
+#' 
+#' #effective sample sizes
+#' bal_sim$ess
+#' 
+#' #we can also trim weights for all methods 
+#' bal_sim_trim <- bal(model_list=c("mvGPS", "entropy", "CBPS", "PS", "GBM"), D, 
+#' C=list(C[, 1:2], C[, 2:3]), trim_w=TRUE, trim_quantile=0.9)
+#' 
+#' #can check to ensure all the weights have been properly trimmed at upper and lower bound
+#' all.equal(unname(unlist(lapply(bal_sim$W, quantile, 0.99))), 
+#' unname(unlist(lapply(bal_sim_trim$W, max))))
+#' all.equal(unname(unlist(lapply(bal_sim$W, quantile, 1-0.99))), 
+#' unname(unlist(lapply(bal_sim_trim$W, min))))
 #' 
 #' @return 
 #'    \itemize{

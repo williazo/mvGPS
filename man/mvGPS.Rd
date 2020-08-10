@@ -103,6 +103,23 @@ both the upper and lower percentile thresholds, i.e.,
 \deqn{w^{*}=w 1_{\{Q(w, 1-q)\le w \le Q(w, q)\}}+Q(w, 1-q) 1_{\{w < Q(w, 1-q)\}} + Q(w, q) 1_{\{w > Q(w, q)\}}}
 }
 }
+\examples{
+#generating confounded bivariate exposure
+sim_dt <- gen_D(method="u", n=200, rho_cond=0.2, s_d1_cond=2, s_d2_cond=2, k=3, 
+C_mu=rep(0, 3), C_cov=0.1, C_var=1, d1_beta=c(0.5, 1, 0), d2_beta=c(0, 0.3, 0.75), seed=06112020)
+D <- sim_dt$D
+C <- sim_dt$C
+
+#generating weights and mvGPS
+out_mvGPS <- mvGPS(D=D, C=list(C[, 1:2], C[, 2:3]))
+
+# can apply trimming with default 99th percentile
+out_mvGPS_trim <- mvGPS(D=D, C=list(C[, 1:2], C[, 2:3]), trim_w=TRUE)
+
+#or assume all exposures have equivalent confounders
+out_mvGPS_common <- mvGPS(D=D, C=C, common=TRUE)
+
+}
 \references{
 \preformatted{\\insertAllCited\{\}
 }

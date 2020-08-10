@@ -59,6 +59,28 @@ convex hull. We return \code{X} that represents the observations used.
 If \code{trim_hull=FALSE}, then \code{X} is unchanged. However, if trimming
 is applied then \code{X} contains only the remaining observations after trimming.
 }
+\examples{
+#generating exposure with m=3
+D <- matrix(unlist(lapply(seq_len(3), function(m) rnorm(100))), nrow=100)
+
+#first using only the first two variables we can return hpts_vs and grid_pts
+D_hull <- hull_sample(D[, 1:2])
+
+#when m>2 we only return hpts_vs and grid_pts is NULL
+D_hull_large <- hull_sample(D)
+is.null(D_hull_large$grid_pts)
+
+#we can also apply trimming to the convex hull and return this reduced matrix
+D_hull_trim <- hull_sample(D[, 1:2], trim_hull=TRUE, trim_quantile=0.95)
+dim(D_hull$X)
+dim(D_hull_trim$X)
+
+#alternatively, we can also define the number of points to sample from for grid_pts
+small_grid <- hull_sample(D[, 1:2], num_grid_pts=100)
+length(D_hull$grid_pts)
+length(small_grid$grid_pts)
+
+}
 \references{
 \preformatted{\\insertAllCited\{\}
 }
