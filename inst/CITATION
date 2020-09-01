@@ -1,0 +1,9 @@
+bibentry(bibtype = "Misc",
+  author = personList(as.person("Justin R. Williams"),
+                             as.person("Catherine M. Crespi")),
+  title = "Causal inference for multiple continuous exposures via the multivariate generalized propensity score",
+  year = "2020",
+  note = "arXiv:2008.13767",
+  header = "To cite mvGPS package in publications, please use:",
+  textVersion = "Williams, J.R., & Crespi, C.M. (2020). Causal inference for multiple continuous exposures via the multivariate generalized propensity score. arXiv:2008.13767."
+)
