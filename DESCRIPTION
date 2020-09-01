@@ -10,8 +10,7 @@ Authors@R:
 Description: Methods for estimating weights and generalized propensity score for multiple continuous exposures via the generalized propensity score described in Williams, J.R, and Cresi, C.M (2020) <arxiv:2008.13767>. Weights are constructed assuming an underlying multivariate normal density for the marginal and conditional distribution of exposures given a set of confounders. These weights can then be used to estimate dose-response curves or surfaces. This method achieves balance across all exposure dimension rather than along a single dimension.
 License: MIT + file LICENSE
 Encoding: UTF-8
-LazyData: true
-Roxygen: list(markdown = TRUE)
+LazyData: false
 RoxygenNote: 7.1.0
 RdMacros: Rdpack
 VignetteBuilder: knitr
