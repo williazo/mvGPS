@@ -101,6 +101,7 @@
 #' #effective sample sizes
 #' bal_sim$ess
 #' 
+#' \dontrun{
 #' #we can also trim weights for all methods 
 #' bal_sim_trim <- bal(model_list=c("mvGPS", "entropy", "CBPS", "PS", "GBM"), D, 
 #' C=list(C[, 1:2], C[, 2:3]), trim_w=TRUE, trim_quantile=0.9)
@@ -110,6 +111,7 @@
 #' unname(unlist(lapply(bal_sim_trim$W, max))))
 #' all.equal(unname(unlist(lapply(bal_sim$W, quantile, 1-0.99))), 
 #' unname(unlist(lapply(bal_sim_trim$W, min))))
+#' }
 #' 
 #' @return 
 #'    \itemize{
