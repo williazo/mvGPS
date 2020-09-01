@@ -1,6 +1,6 @@
 Package: mvGPS
 Title: Causal Inference using Multivariate Generalized Propensity Score
-Version: 1.0.0
+Version: 1.0.1
 Authors@R: 
     person(given = "Justin",
            family = "Williams",
@@ -33,4 +33,5 @@ Suggests:
     knitr,
     dagitty,
     ggdag,
-    dplyr
+    dplyr,
+    rmarkdown
