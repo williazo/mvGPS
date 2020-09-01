@@ -30,7 +30,6 @@ devtools::install_github("williazo/mvGPS")
 To illustrate a simple setting where this multivariate generalized propensity score would be useful, we can construct a directed acyclic graph (DAG) with a bivariate exposure, **D**=(D<sub>1</sub>, D<sub>2</sub>), confounded by a set **C**=(C<sub>1</sub>, C<sub>2</sub>, C<sub>3</sub>). In this case we assume C<sub>1</sub> and C<sub>2</sub> are associated with D<sub>1</sub>, while C<sub>2</sub> and C<sub>3</sub> are associated with D<sub>2</sub> as shown below.
 
 ```{r dag_draw, echo=FALSE, fig.align="center", out.width="50%", cache=TRUE}
-require(tidyverse)
 require(dagitty)
 require(ggdag)
 dag_coords <- data.frame(x=c(5.5, 5.5, 10.5, 8, 8, 10.5), 
@@ -41,7 +40,7 @@ dag_saturated <- dagify(Y~D1+D2+C1+C2+C3,
                         D1~~D2, outcome="Y", coords=dag_coords)
 sim_dag <- dag_saturated %>% 
     tidy_dagitty(layout = "nicely", seed = 12345) %>%
-    arrange(name) %>% 
+    dplyr::arrange(name) %>% 
     ggplot(aes(x = x, y = y, xend = xend, yend = yend)) +
     geom_dag_edges() +
     geom_dag_text(parse = TRUE, 
