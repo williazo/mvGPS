@@ -1,10 +1,10 @@
 ---
-title: "Multivariate generalized propensity score"
+title: "Multivariate generalized propensity score: An introduction"
 author: "Justin Williams"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteIndexEntry{mvGPS-intro}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
