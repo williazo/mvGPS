@@ -20,13 +20,13 @@ gen_D(
 )
 }
 \arguments{
-\item{method}{character value identifying which method to use when generating
+\item{method}{character value identifying which method to use when generating 
 bivariate exposure. Options include "matrix_normal", "uni_cond", and "vector_normal".
 See details for a brief explanation of each method. \code{uni_cond} is fastest}
 
 \item{n}{integer value total number of units}
 
-\item{rho_cond}{scalar value identifying conditional correlation of exposures given covariates between [0, 1]}
+\item{rho_cond}{scalar value identifying conditional correlation of exposures given covariates between \[0, 1\]}
 
 \item{s_d1_cond}{scalar value for conditional standard deviation of \code{D1}}
 
@@ -48,82 +48,82 @@ See details for a brief explanation of each method. \code{uni_cond} is fastest}
 }
 \value{
 \itemize{
-\item \code{D}: nx2 numeric matrix of the sample values for the exposures given the set \code{C}
-\item \code{C}: nxk numeric matrix of the sampled values for the confounding set \code{C}
-\item \code{D_Sigma}: 2x2 numeric matrix of the true marginal covariance of exposures
-\item \code{rho}: numeric scalar representing the true marginal correlation of exposures
+ \item \code{D}: nx2 numeric matrix of the sample values for the exposures given the set \code{C}
+ \item \code{C}: nxk numeric matrix of the sampled values for the confounding set \code{C}
+ \item \code{D_Sigma}: 2x2 numeric matrix of the true marginal covariance of exposures
+ \item \code{rho}: numeric scalar representing the true marginal correlation of exposures
 }
 }
 \description{
-Generate exposure from a bivariate normal distribution confounded by a set of
+Generate exposure from a bivariate normal distribution confounded by a set of 
 variables \code{C}=\(C1, C2).
 }
 \details{
 \subsection{Generating Confounders}{
-
-We assume that there are a total of \code{k} confounders that are generated
-from a multivariate normal distribution with equicorrelation covariance, i.e.,
-\deqn{\Sigma_{C}=\phi(\mathbf{1}\mathbf{1}^{T}-\mathbf{I})+\mathbf{I}\sigma^{2}_{C},}
-where \eqn{\mathbf{1}} is the column vector with all entries equal to 1,
-\eqn{\mathbf{I}} is the identity matrix, \eqn{\sigma^{2}_{C}} is a constant
-standard deviation for all confounders, and \eqn{\phi} is the covariance of
-any two confounders. Therefore, our random confounders
-\code{C} follow the distribution
-\deqn{\mathbf{C}\sim N_{k}(\boldsymbol{\mu}_{C}, \Sigma_{C}).}
-We draw a total of \code{n} samples from this multivariate normal distribution
-using \code{\link[MASS]{mvrnorm}}.
-}
-\subsection{Generating Bivariate Exposure}{
-
-The first step when generating the bivariate exposure is to specify the
-effects of the confounders \code{C}. We control this for each exposure value
-using the arguments \code{d1_beta} and \code{d2_beta} such that
-\deqn{E[D_{1}\mid \mathbf{C}]=\boldsymbol{\beta}^{T}_{D1}\mathbf{C}} and
-\deqn{E[D_{2}\mid \mathbf{C}]=\boldsymbol{\beta}^{T}_{D2}\mathbf{C}}.
-
-Note that by specifying \code{d1_beta} and \code{d2_beta} separately that the
-user can control the amount of overlap in the confounders for each exposure,
-and how many of the variables in \code{C} are truly related to the exposures.
-For instance to have the exposure have identical confounding effects
-\code{d1_beta}=\code{d2_beta}, and they have separate confounding if there are
-zero non-zero elements in common between \code{d1_beta} and \code{d2_beta}.
-
-To generate the bivariate conditional distribution of exposures given the set
-of confounders \code{C} we have the following three methods:
-\itemize{
-\item "matrix_normal"
-\item "uni_cond"
-\item "vector_normal"
-}
-
-"matrix_normal" uses the function \code{\link[matrixNormal]{rmatnorm}} to
-generate all \code{n} samples as
-\deqn{\mathbf{D}\mid\mathbf{C}\sim N_{n \times 2}(\boldsymbol{\beta}\mathbf{C}, \mathbf{I}_{n}, \Omega)}
-where \eqn{\boldsymbol{\beta}} is a column vector containing \eqn{\boldsymbol{\beta}^{T}_{D1}}
-and \eqn{\boldsymbol{\beta}^{T}_{D2}}, and \eqn{\Omega} is the conditional covariance matrix.
-
-"vector_normal" simply vectorizes the matrix_normal method above to generate
-a vector of length \eqn{n \times 2}.
-
-"uni_cond" specifies the bivariate exposure using univariate conditional
-factorization, which in the case of bivariate normal results in two univariate
-normal expressions.
-
-In general, we suggest using the univariate conditional, "uni_cond", method
-when generating exposures as it is substantially faster than both the
-matrix normal and vector normal approaches.
-
-Note that the options use regular expression matching and can be specified
-uniquely using either "m", "u", or "v".
-}
-\subsection{Marginal Covariance of Exposures}{
-
-As described above the exposures are drawn conditional on the set \code{C},
-so the marginal covariance of exposures is defined as
-\deqn{\Sigma_{D}= \boldsymbol{\beta}\Sigma_{C}\boldsymbol{\beta}^{T}+\Omega.}
-In our function we return the true marginal covariance \eqn{\Sigma_{D}} as well
-as the true marginal correlation \eqn{\rho_{D}}.
-}
+ 
+ We assume that there are a total of \code{k} confounders that are generated 
+ from a multivariate normal distribution with equicorrelation covariance, i.e., 
+ \deqn{\Sigma_{C}=\phi(\mathbf{1}\mathbf{1}^{T}-\mathbf{I})+\mathbf{I}\sigma^{2}_{C},}
+ where \eqn{\mathbf{1}} is the column vector with all entries equal to 1,
+ \eqn{\mathbf{I}} is the identity matrix, \eqn{\sigma^{2}_{C}} is a constant 
+ standard deviation for all confounders, and \eqn{\phi} is the covariance of 
+ any two confounders. Therefore, our random confounders 
+ \code{C} follow the distribution
+ \deqn{\mathbf{C}\sim N_{k}(\boldsymbol{\mu}_{C}, \Sigma_{C}).} 
+ We draw a total of \code{n} samples from this multivariate normal distribution 
+ using \code{\link[MASS]{mvrnorm}}.
+ }
+ \subsection{Generating Bivariate Exposure}{
+ 
+ The first step when generating the bivariate exposure is to specify the 
+ effects of the confounders \code{C}. We control this for each exposure value
+ using the arguments \code{d1_beta} and \code{d2_beta} such that
+ \deqn{E[D_{1}\mid \mathbf{C}]=\boldsymbol{\beta}^{T}_{D1}\mathbf{C}} and
+ \deqn{E[D_{2}\mid \mathbf{C}]=\boldsymbol{\beta}^{T}_{D2}\mathbf{C}}.
+ 
+ Note that by specifying \code{d1_beta} and \code{d2_beta} separately that the
+ user can control the amount of overlap in the confounders for each exposure, 
+ and how many of the variables in \code{C} are truly related to the exposures.
+ For instance to have the exposure have identical confounding effects
+ \code{d1_beta}=\code{d2_beta}, and they have separate confounding if there are 
+ zero non-zero elements in common between \code{d1_beta} and \code{d2_beta}.
+ 
+ To generate the bivariate conditional distribution of exposures given the set
+ of confounders \code{C} we have the following three methods:
+ \itemize{
+  \item "matrix_normal"
+  \item "uni_cond"
+  \item "vector_normal"
+  }
+  
+  "matrix_normal" uses the function \code{\link[matrixNormal]{rmatnorm}} to
+  generate all \code{n} samples as
+  \deqn{\mathbf{D}\mid\mathbf{C}\sim N_{n \times 2}(\boldsymbol{\beta}\mathbf{C}, \mathbf{I}_{n}, \Omega)}
+  where \eqn{\boldsymbol{\beta}} is a column vector containing \eqn{\boldsymbol{\beta}^{T}_{D1}}
+  and \eqn{\boldsymbol{\beta}^{T}_{D2}}, and \eqn{\Omega} is the conditional covariance matrix.
+  
+  "vector_normal" simply vectorizes the matrix_normal method above to generate
+  a vector of length \eqn{n \times 2}. 
+  
+  "uni_cond" specifies the bivariate exposure using univariate conditional 
+  factorization, which in the case of bivariate normal results in two univariate
+  normal expressions.
+  
+  In general, we suggest using the univariate conditional, "uni_cond", method
+  when generating exposures as it is substantially faster than both the 
+  matrix normal and vector normal approaches.
+  
+  Note that the options use regular expression matching and can be specified 
+  uniquely using either "m", "u", or "v".
+ }
+ \subsection{Marginal Covariance of Exposures}{
+ 
+ As described above the exposures are drawn conditional on the set \code{C},
+ so the marginal covariance of exposures is defined as 
+ \deqn{\Sigma_{D}= \boldsymbol{\beta}\Sigma_{C}\boldsymbol{\beta}^{T}+\Omega.}
+ In our function we return the true marginal covariance \eqn{\Sigma_{D}} as well
+ as the true marginal correlation \eqn{\rho_{D}}.
+ }
 }
 \examples{
 #generate bivariate exposures. D1 confounded by C1 and C2. D2 by C2 and C3

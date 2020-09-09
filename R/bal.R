@@ -85,8 +85,9 @@
 #' 
 #' @examples 
 #' #simulating data
-#' sim_dt <- gen_D(method="u", n=200, rho_cond=0.2, s_d1_cond=2, s_d2_cond=2, k=3, 
-#' C_mu=rep(0, 3), C_cov=0.1, C_var=1, d1_beta=c(0.5, 1, 0), d2_beta=c(0, 0.3, 0.75), seed=06112020)
+#' sim_dt <- gen_D(method="u", n=150, rho_cond=0.2, s_d1_cond=2, s_d2_cond=2, 
+#' k=3, C_mu=rep(0, 3), C_cov=0.1, C_var=1, d1_beta=c(0.5, 1, 0), 
+#' d2_beta=c(0, 0.3, 0.75), seed=06112020)
 #' D <- sim_dt$D
 #' C <- sim_dt$C
 #' 
@@ -101,17 +102,18 @@
 #' #effective sample sizes
 #' bal_sim$ess
 #' 
-#' \dontrun{
 #' #we can also trim weights for all methods 
 #' bal_sim_trim <- bal(model_list=c("mvGPS", "entropy", "CBPS", "PS", "GBM"), D, 
-#' C=list(C[, 1:2], C[, 2:3]), trim_w=TRUE, trim_quantile=0.9)
+#' C=list(C[, 1:2], C[, 2:3]), trim_w=TRUE, trim_quantile=0.9, p.mean=0.5)
+#' #note that in this case we can also pass additional arguments using in 
+#' #WeighIt package for entropy, CBPS, PS, and GBM such as specifying the p.mean
 #' 
-#' #can check to ensure all the weights have been properly trimmed at upper and lower bound
+#' #can check to ensure all the weights have been properly trimmed at upper and 
+#' #lower bound
 #' all.equal(unname(unlist(lapply(bal_sim$W, quantile, 0.99))), 
 #' unname(unlist(lapply(bal_sim_trim$W, max))))
 #' all.equal(unname(unlist(lapply(bal_sim$W, quantile, 1-0.99))), 
 #' unname(unlist(lapply(bal_sim_trim$W, min))))
-#' }
 #' 
 #' @return 
 #'    \itemize{

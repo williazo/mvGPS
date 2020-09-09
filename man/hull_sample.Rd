@@ -9,12 +9,12 @@ hull_sample(X, num_grid_pts = 500, trim_hull = FALSE, trim_quantile = NULL)
 \arguments{
 \item{X}{numeric matrix of n by m dimensions. Each row corresponds to a point in m-dimensional space.}
 
-\item{num_grid_pts}{integer scalar denoting the number of parameters to
+\item{num_grid_pts}{integer scalar denoting the number of parameters to 
 search for over the convex hull. Default is 500.}
 
 \item{trim_hull}{logical indicator of whether to restrict convex hull. Default is FALSE}
 
-\item{trim_quantile}{numeric scalar between [0.5, 1] representing the
+\item{trim_quantile}{numeric scalar between \[0.5, 1\] representing the 
 quantile value to trim the convex hull. Only used if trim_hull is set to TRUE.}
 }
 \value{
@@ -25,7 +25,7 @@ quantile value to trim the convex hull. Only used if trim_hull is set to TRUE.}
 }
 }
 \description{
-To define a proper estimable region with multivariate exposure we construct
+To define a proper estimable region with multivariate exposure we construct 
 a convex hull of the data in order to maintain the positivity identifying assumption.
 We also provide options to create trimmed versions of the convex hull to further
 restrict to high density regions in multidimensional space.
@@ -36,10 +36,10 @@ exposure of interest. We can define the convex hull of these observations as
 \strong{H}. There are two distinct processes for defining \strong{H} depending
 on whether \eqn{m=2} or \eqn{m>2}.
 
-If \eqn{m=2}, we use the \code{\link[grDevices]{chull}} function to define the
+If \eqn{m=2}, we use the \code{\link[grDevices]{chull}} function to define the 
 vertices of the convex hull. The algorithm implemented is described in \insertCite{eddy1977new;textual}{mvGPS}.
 
-If \eqn{m>2}, we use the \code{\link[geometry]{convhulln}} function. This algorithm
+If \eqn{m>2}, we use the \code{\link[geometry]{convhulln}} function. This algorithm 
 for obtaining the convex hull in m-dimensional space uses Qhull described in
 \insertCite{barber1996quickhull;textual}{mvGPS}. Currently this function returns
 only the vertex set \code{hpts_vs} without the grid sample points. There are
@@ -47,15 +47,15 @@ options to visualize the convex hull when \eqn{m=3} using triangular facets,
 but there are no implementable solutions to sample along convex hulls in higher
 dimensions.
 
-To restrict the convex hull to higher density regions of the exposure we can
-apply trimming. To apply trimming set \code{trim_hull=TRUE} and specify
-\code{trim_quantile=q} where \code{q} must be in [0.5, 1]. Along each
-exposure dimension we then calculate the upper and lower bounds using the
-\code{\link[stats]{quantile}} function, i.e., \code{quantile(q)} and
+To restrict the convex hull to higher density regions of the exposure we can 
+apply trimming. To apply trimming set \code{trim_hull=TRUE} and specify 
+\code{trim_quantile=q} where \code{q} must be in \[0.5, 1\]. Along each
+exposure dimension we then calculate the upper and lower bounds using the 
+\code{\link[stats]{quantile}} function, i.e., \code{quantile(q)} and 
 \code{quantile(1-q)}. Any observations that have a value above or below these
-sample quantiles is excluded. The remaining observations that fall completely
-within the sample quantiles across all dimensions are used to estimate the
-convex hull. We return \code{X} that represents the observations used.
+sample quantiles is excluded. The remaining observations that fall completely 
+within the sample quantiles across all dimensions are used to estimate the 
+convex hull. We return \code{X} that represents the observations used. 
 If \code{trim_hull=FALSE}, then \code{X} is unchanged. However, if trimming
 is applied then \code{X} contains only the remaining observations after trimming.
 }
@@ -82,6 +82,5 @@ length(small_grid$grid_pts)
 
 }
 \references{
-\preformatted{\\insertAllCited\{\}
-}
+\insertAllCited{}
 }

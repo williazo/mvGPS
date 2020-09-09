@@ -10,8 +10,8 @@ D_C_check(D, C, common)
 \arguments{
 \item{D}{numeric matrix of dimension \eqn{n} by \eqn{m} designating values of the exposures}
 
-\item{C}{either a list of numeric matrices of length \eqn{m} of dimension
-\eqn{n} by \eqn{p_j} designating values of the confounders for each exposure
+\item{C}{either a list of numeric matrices of length \eqn{m} of dimension 
+\eqn{n} by \eqn{p_j} designating values of the confounders for each exposure 
 value or if \code{common} is TRUE a single matrix of of dimension \eqn{n} by
 \eqn{p} that represents common confounders for all exposures.}
 
