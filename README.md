@@ -3,6 +3,12 @@ Multivariate Generalized Propensity Score (mvGPS)
 
 <!-- begin badges -->
 
+[![CRAN
+version](http://www.r-pkg.org/badges/version/mvGPS)](https://cran.r-project.org/package=mvGPS)
+[![CRAN RStudio mirror
+downloads](http://cranlogs.r-pkg.org/badges/grand-total/mvGPS)](https://cran.r-project.org/package=mvGPS)
+[![cran
+checks](https://cranchecks.info/badges/worst/mvGPS)](https://cran.r-project.org/web/checks/check_results_mvGPS.html)
 [![Build
 Status](https://travis-ci.org/williazo/mvGPS.svg?branch=master)](https://travis-ci.org/williazo/mvGPS)
 [![codecov](https://codecov.io/gh/williazo/mvGPS/branch/master/graph/badge.svg)](https://codecov.io/gh/williazo/mvGPS)
@@ -15,9 +21,14 @@ exposures.
 
 # Installation
 
-You can install `mvGPS` from GitHub using the following code:
+You can install `mvGPS` from CRAN for the stable release or GitHub for
+the development version using the following code:
 
 ``` r
+# stable release in CRAN
+install.packages("mvGPS")
+
+# development version on GitHub
 install.packages("devtools")
 devtools::install_github("williazo/mvGPS")
 ```

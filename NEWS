@@ -1,3 +1,6 @@
+version 1.0.2 (2020-09-17)
+  + Package is available in CRAN repository <https://cran.r-project.org/web/checks/check_results_mvGPS.html>
+
 version 1.0.0 (2020-08-31)
   + Manuscript available on arXiv and initial CRAN package submission
 
