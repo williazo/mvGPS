@@ -1,6 +1,6 @@
 Package: mvGPS
 Title: Causal Inference using Multivariate Generalized Propensity Score
-Version: 1.0.2
+Version: 1.1.0
 Authors@R: 
     person(given = "Justin",
            family = "Williams",

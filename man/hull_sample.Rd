@@ -4,13 +4,22 @@
 \alias{hull_sample}
 \title{Sample Points Along a Convex Hull}
 \usage{
-hull_sample(X, num_grid_pts = 500, trim_hull = FALSE, trim_quantile = NULL)
+hull_sample(
+  X,
+  num_grid_pts = 500,
+  grid_type = "regular",
+  trim_hull = FALSE,
+  trim_quantile = NULL
+)
 }
 \arguments{
 \item{X}{numeric matrix of n by m dimensions. Each row corresponds to a point in m-dimensional space.}
 
 \item{num_grid_pts}{integer scalar denoting the number of parameters to 
 search for over the convex hull. Default is 500.}
+
+\item{grid_type}{character value indicating the type of grid to sample from
+the convex hull from \code{\link[sp]{spsample}}}
 
 \item{trim_hull}{logical indicator of whether to restrict convex hull. Default is FALSE}
 

@@ -8,6 +8,8 @@
 #' @param X numeric matrix of n by m dimensions. Each row corresponds to a point in m-dimensional space.
 #' @param num_grid_pts integer scalar denoting the number of parameters to 
 #' search for over the convex hull. Default is 500.
+#' @param grid_type character value indicating the type of grid to sample from
+#' the convex hull from \code{\link[sp]{spsample}}
 #' @param trim_hull logical indicator of whether to restrict convex hull. Default is FALSE
 #' @param trim_quantile numeric scalar between \[0.5, 1\] representing the 
 #' quantile value to trim the convex hull. Only used if trim_hull is set to TRUE.
@@ -78,10 +80,15 @@
 #' }
 #' 
 #' @export
-hull_sample <- function(X,  num_grid_pts=500, trim_hull=FALSE, trim_quantile=NULL){
+hull_sample <- function(X,
+                        num_grid_pts=500,
+                        grid_type="regular",
+                        trim_hull=FALSE,
+                        trim_quantile=NULL) {
     X_rslt <- X_check(X)
     assign("X", X_rslt$X)
     assign("m", X_rslt$m)
+    grid_type <- match.arg(grid_type, choices = c("regular", "random", "hexagonal"))
     if(trim_hull==TRUE){
         if(is.null(trim_quantile)) stop("trim_hull set to TRUE but trim_quantile not specified.", call.=FALSE)
         if(trim_quantile<0.5 | trim_quantile>1) stop("trim_quantile must be between [0.5, 1]", call.=FALSE)
@@ -106,7 +113,7 @@ hull_sample <- function(X,  num_grid_pts=500, trim_hull=FALSE, trim_quantile=NUL
         # wrap Polygons object into SpatialPolygons object
         sps <- SpatialPolygons(list(ps))
         #sampling regular points along grid of polygon
-        sp_grid_pts <- spsample(sps, n=num_grid_pts, type="regular")
+        sp_grid_pts <- spsample(sps, n=num_grid_pts, type=grid_type)
         grid_pts <- coordinates(sp_grid_pts)
         colnames(grid_pts) <- colnames(X)
     } else {
