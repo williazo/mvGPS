@@ -136,9 +136,13 @@ bal <- function(model_list, D, C, common=FALSE, trim_w=FALSE, trim_quantile=0.99
     
     m <- ncol(D)
     
-    m_list <- as.list(match.arg(model_list, 
-                                    c("mvGPS", "entropy", "CBPS", "PS", "GBM"), 
-                                    several.ok=TRUE))
+    m_list <- as.list(
+        match.arg(
+            model_list,
+            c("mvGPS", "entropy", "CBPS", "PS", "GBM"), 
+            several.ok=TRUE
+        )
+    )
     if(any(is.na(pmatch(model_list, unlist(m_list))))){
         exclude_m <- model_list[is.na(pmatch(model_list, unlist(m_list)))]
         warning("The following model(s) specified but not used: ", paste(exclude_m, collapse=", "), call.=FALSE)
@@ -146,21 +150,34 @@ bal <- function(model_list, D, C, common=FALSE, trim_w=FALSE, trim_quantile=0.99
     
     W <- lapply(m_list, function(mod){
        if(mod=="mvGPS"){
-           w <- mvGPS(D, C, common, trim_w, trim_quantile)
+           w <- mvGPS(D, C, common = FALSE, trim_w, trim_quantile)
+           #NOTE: we force common to be FALSE as we already create C from check in line 135
            w_mvGPS <- list(w$wts)
            names(w_mvGPS) <- "mvGPS"
            w <- w_mvGPS
-       } else { #all other methods use the weightit function
+       } else {
+           #all other methods use the weightit function
            if(all_uni==TRUE){
                w <- lapply(seq_len(m), function(d){
-                   w <- weightit(D[, d]~C[[d]], method=mod, ...)
-                   w <- w$weights
-                   if(trim_w==TRUE){
-                       #trimming the large weights
-                       w <- ifelse(w<quantile(w, trim_quantile), w, quantile(w, trim_quantile))
-                       #trimming the small weights
-                       w <- ifelse(w>quantile(w, 1-trim_quantile), w, quantile(w, 1-trim_quantile))
-                   }
+                   w <- tryCatch(
+                       expr= {
+                           w <- weightit(D[, d]~C[[d]], method=mod, ...)
+                           w <- w$weights
+                           if(trim_w==TRUE){
+                               #trimming the large weights
+                               w <- ifelse(w<quantile(w, trim_quantile), w, quantile(w, trim_quantile))
+                               #trimming the small weights
+                               w <- ifelse(w>quantile(w, 1-trim_quantile), w, quantile(w, 1-trim_quantile))
+                           }
+                           return(w)
+                       },
+                       error = function(e) {
+                           msg <- paste0(mod, " failed estimating exposure ", d, ". Returning null weights.")
+                           warning(msg, call. = FALSE)
+                           w <- NULL
+                           return(w)
+                       }
+                   )
                    w
                })
                names(w) <- paste0(mod, "_", colnames(D))
