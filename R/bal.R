@@ -166,15 +166,13 @@ bal <- function(model_list, D, C, common=FALSE, trim_w=FALSE, trim_quantile=0.99
                            if(trim_w==TRUE){
                                #trimming the large weights
                                w <- ifelse(w<quantile(w, trim_quantile), w, quantile(w, trim_quantile))
-                               #trimming the small weights
-                               w <- ifelse(w>quantile(w, 1-trim_quantile), w, quantile(w, 1-trim_quantile))
                            }
                            return(w)
                        },
                        error = function(e) {
-                           msg <- paste0(mod, " failed estimating exposure ", d, ". Returning null weights.")
+                           msg <- paste0(mod, " failed estimating exposure ", d, ". Returning NA weights.")
                            warning(msg, call. = FALSE)
-                           w <- NULL
+                           w <- rep(NA, nrow(D))
                            return(w)
                        }
                    )
@@ -187,8 +185,6 @@ bal <- function(model_list, D, C, common=FALSE, trim_w=FALSE, trim_quantile=0.99
                if(trim_w==TRUE){
                    #trimming the large weights
                    w <- ifelse(w<quantile(w, trim_quantile), w, quantile(w, trim_quantile))
-                   #trimming the small weights
-                   w <- ifelse(w>quantile(w, 1-trim_quantile), w, quantile(w, 1-trim_quantile))
                }
                w <- list(w)
                names(w) <- paste0(mod, "_", colnames(D)[1])
