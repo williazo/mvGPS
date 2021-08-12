@@ -165,8 +165,6 @@ mvGPS <- function(D, C, common=FALSE, trim_w=FALSE, trim_quantile=0.99){
     if(trim_w==TRUE){
         #trimming the large weights
         w <- ifelse(w<quantile(w, trim_quantile), w, quantile(w, trim_quantile))
-        #trimming the small weights
-        w <- ifelse(w>quantile(w, 1-trim_quantile), w, quantile(w, 1-trim_quantile))
     }
     return(list(score=score, wts=w))
 }
