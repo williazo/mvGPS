@@ -18,13 +18,10 @@ test_that("Argument check", {
     
     out_trim <- bal(model_list=c("mv", "ent", "PS"), D=D, C=C, trim_w=TRUE)
     
-    #checking the min and max trimming
+    #checking the max trimming
     expect_equal(unname(unlist(lapply(out$W, quantile, 0.99))),
                  unname(unlist(lapply(out_trim$W, max, 0.99))))
 
-    expect_equal(unname(unlist(lapply(out$W, quantile, 1-0.99))),
-                 unname(unlist(lapply(out_trim$W, min, 0.99))))
-    
     #for each univariate method we expect them to have metric for each exposure,
     #i.e, 2 * 3 and we have one from mvGPS and one unweighted
     expect_equal(nrow(out$bal_metrics), 1 + 1 + 2 * 3)
