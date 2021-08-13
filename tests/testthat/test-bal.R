@@ -35,12 +35,9 @@ test_that("Argument check", {
     
     out_uni_trim <- bal(model_list=c("mv", "ent", "PS"), D=D, C=C, 
                         all_uni=FALSE, trim_w=TRUE)
-    #checking the min and max trimming
+    #checking the max trimming
     expect_equal(unname(unlist(lapply(out_uni$W, quantile, 0.99))),
                  unname(unlist(lapply(out_uni_trim$W, max))))
-    
-    expect_equal(unname(unlist(lapply(out_uni$W, quantile, 1-0.99))),
-                 unname(unlist(lapply(out_uni_trim$W, min))))
     
     #there is an additional warning whenever GBM is used
     expect_warning(bal(model_list=c("GBM"), D=D, C=C))

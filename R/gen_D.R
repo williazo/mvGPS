@@ -133,10 +133,6 @@ gen_D <- function(method,
     method <- match.arg(method, c("matrix_normal", "uni_cond", "vector_normal"))
 
     if (is.null(C_sigma)) {
-        message(
-            "No covariance matrix provided, will use C_var and C_cov to ",
-            "construct constant covariance matrix"
-        )
         C_Sigma <- I(k) * C_var + ((J(k) - I(k))*C_cov)
     }
     
