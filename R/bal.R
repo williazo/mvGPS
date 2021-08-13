@@ -170,9 +170,14 @@ bal <- function(model_list, D, C, common=FALSE, trim_w=FALSE, trim_quantile=0.99
                            return(w)
                        },
                        error = function(e) {
-                           msg <- paste0(mod, " failed estimating exposure ", d, ". Returning NA weights.")
+                           msg <- paste0(
+                               mod,
+                               " failed estimating exposure ",
+                               d,
+                               ". Returning 1 for all weights equivalent to no weighting applied."
+                              )
                            warning(msg, call. = FALSE)
-                           w <- rep(NA, nrow(D))
+                           w <- rep(1, nrow(D))
                            return(w)
                        }
                    )
