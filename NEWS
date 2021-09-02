@@ -1,3 +1,6 @@
+version 1.2.0 (2021-08-11)
+  + If trimming, only trim weights at upper quantile
+
 version 1.0.2 (2020-09-17)
   + Package is available in CRAN repository <https://cran.r-project.org/web/checks/check_results_mvGPS.html>
 

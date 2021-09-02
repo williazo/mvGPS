@@ -46,5 +46,4 @@ test_that("Expected output", {
     #checking to make sure the trimming is occurring properly
     out_trim <- mvGPS(D, C1, common=TRUE, trim_w=TRUE)
     expect_true(quantile(out$wts, 0.99)==max(out_trim$wts))
-    expect_true(quantile(out$wts, 1-0.99)==min(out_trim$wts))
 })
