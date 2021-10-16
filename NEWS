@@ -1,3 +1,6 @@
+version 1.2.1 (2021-10-16)
+  + Update DESCRIPTION to fix windows build errors
+
 version 1.2.0 (2021-08-11)
   + If trimming, only trim weights at upper quantile
 
