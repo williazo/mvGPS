@@ -1,13 +1,22 @@
 Package: mvGPS
 Title: Causal Inference using Multivariate Generalized Propensity Score
-Version: 1.2.0
-Authors@R: 
+Version: 1.2.1
+Authors@R:
     person(given = "Justin",
            family = "Williams",
            role = c("aut", "cre"),
            email = "williazo@ucla.edu",
            comment = c(ORCID = "https://orcid.org/0000-0002-5045-2764"))
-Description: Methods for estimating and utilizing the multivariate generalized propensity score (mvGPS) for multiple continuous exposures described in Williams, J.R, and Crespi, C.M. (2020) <arxiv:2008.13767>. The methods allow estimation of a dose-response surface relating the joint distribution of multiple continuous exposure variables to an outcome. Weights are constructed assuming a multivariate normal density for the marginal and conditional distribution of exposures given a set of confounders. Confounders can be different for different exposure variables. The weights are designed to achieve balance across all exposure dimensions and can be used to estimate dose-response surfaces.
+Description:
+    Methods for estimating and utilizing the multivariate generalized
+    propensity score (mvGPS) for multiple continuous exposures described in
+    Williams, J.R, and Crespi, C.M. (2020) <arxiv:2008.13767>. The methods allow
+    estimation of a dose-response surface relating the joint distribution of multiple
+    continuous exposure variables to an outcome. Weights are constructed assuming a
+    multivariate normal density for the marginal and conditional distribution of
+    exposures given a set of confounders. Confounders can be different for different
+    exposure variables. The weights are designed to achieve balance across all
+    exposure dimensions and can be used to estimate dose-response surfaces.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: false
@@ -28,10 +37,11 @@ Imports:
     CBPS
 BugReports: https://github.com/williazo/mvGPS/issues
 URL: https://github.com/williazo/mvGPS
-Suggests: 
+Suggests:
     testthat,
     knitr,
     dagitty,
     ggdag,
     dplyr,
-    rmarkdown
+    rmarkdown,
+    ggplot2
