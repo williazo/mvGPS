@@ -32,6 +32,7 @@ To illustrate a simple setting where this multivariate generalized propensity sc
 ```{r dag_draw, echo=FALSE, fig.align="center", out.width="50%", cache=TRUE}
 require(dagitty)
 require(ggdag)
+require(ggplot2)
 dag_coords <- data.frame(x=c(5.5, 5.5, 10.5, 8, 8, 10.5), 
                          y=c(4, 7, 7, 6, 3, 4), 
                          name=c("C1", "D1", "D2", "C2", "Y", "C3"))
