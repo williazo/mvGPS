@@ -107,14 +107,14 @@ numerator is equal to the marginal density, with the denominator
 corresponding to the conditional density, i.e., the multivariate
 generalized propensity score.
 
-`w = f(D)/f(D|C)`
+<img src="https://latex.codecogs.com/gif.latex?w=\frac{f(\mathbf{D})}{f(\mathbf{D}\mid\mathbf{C})}" title="w=\frac{f(\mathbf{D})}{f(\mathbf{D}\mid\mathbf{C})}" />
 
 In our case since the bivariate exposure is assumed to be bivariate
 normal, we can break both the numerator and denominator into full
 conditional densities knowing that each univariate conditional
 expression will remain normally distributed.
 
-`w = f(D2|D1)f(D1)/f(D2|D1,C2,C3)f(D1|C1,C2)`
+<img src="https://latex.codecogs.com/gif.latex?w=\frac{f(D_2\mid&space;D_1)f(D_1)}{f(D_2\mid&space;D_1,&space;C_2,&space;C_3)f(D_1\mid&space;C_1,&space;C_2)}" title="w=\frac{f(D_2\mid D_1)f(D_1)}{f(D_2\mid D_1, C_2, C_3)f(D_1\mid C_1, C_2)}" />
 
 Notice in the equation above, we are also able to specify the
 confounding set for each exposure separately.
