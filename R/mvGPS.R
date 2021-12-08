@@ -88,6 +88,7 @@
 #' }
 #'
 #' @importFrom stats model.frame model.matrix lm coef dnorm quantile
+#' @importFrom Rdpack reprompt
 #' 
 #' @examples
 #' #generating confounded bivariate exposure
