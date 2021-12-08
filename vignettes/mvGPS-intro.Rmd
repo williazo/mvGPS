@@ -33,19 +33,19 @@ To illustrate a simple setting where this multivariate generalized propensity sc
 require(dagitty)
 require(ggdag)
 require(ggplot2)
-dag_coords <- data.frame(x=c(5.5, 5.5, 10.5, 8, 8, 10.5), 
-                         y=c(4, 7, 7, 6, 3, 4), 
+dag_coords <- data.frame(x=c(5.5, 5.5, 10.5, 8, 8, 10.5),
+                         y=c(4, 7, 7, 6, 3, 4),
                          name=c("C1", "D1", "D2", "C2", "Y", "C3"))
 dag_saturated <- dagify(Y~D1+D2+C1+C2+C3,
                         D1~C1+C2, D2~C2+C3,
                         D1~~D2, outcome="Y", coords=dag_coords)
-sim_dag <- dag_saturated %>% 
+sim_dag <- dag_saturated %>%
     tidy_dagitty(layout = "nicely", seed = 12345) %>%
-    dplyr::arrange(name) %>% 
+    dplyr::arrange(name) %>%
     ggplot(aes(x = x, y = y, xend = xend, yend = yend)) +
     geom_dag_edges() +
-    geom_dag_text(parse = TRUE, 
-                  label = c(bquote(C[1]), bquote(C[2]), bquote(C[3]), bquote(D[1]), bquote(D[2]), "Y"), size=10, 
+    geom_dag_text(parse = TRUE,
+                  label = c(bquote(C[1]), bquote(C[2]), bquote(C[3]), bquote(D[1]), bquote(D[2]), "Y"), size=10,
                   color=c("black")) +
     theme_dag()
 sim_dag
@@ -59,13 +59,13 @@ E[D<sub>1</sub>|**C**]=0.5C<sub>1</sub>+C<sub>2</sub>,
 
 E[D<sub>2</sub>|**C**]=0.3C<sub>2</sub>+0.75C<sub>3</sub>.
 
-With this construction, the exposures have one confounder in common, C<sub>2</sub>, and one independent confounder. The effect size of the confounders vary for each exposure. We assume that the conditional distribution of **D** given **C** is bivariate normal with conditional correlation equal to 0.2 and conditional variance equal to 2. 
+With this construction, the exposures have one confounder in common, C<sub>2</sub>, and one independent confounder. The effect size of the confounders vary for each exposure. We assume that the conditional distribution of **D** given **C** is bivariate normal with conditional correlation equal to 0.2 and conditional variance equal to 2.
 
 To generate the set of confounders and the corresponding bivariate exposure we can use the function `gen_D()` as shown below.
 ```{r gen_exposure, message=FALSE, warning=FALSE}
 require(mvGPS)
-sim_dt <- gen_D(method="u", n=200, rho_cond=0.2, s_d1_cond=2, s_d2_cond=2, k=3, 
-                C_mu=rep(0, 3), C_cov=0.1, C_var=1, 
+sim_dt <- gen_D(method="u", n=200, rho_cond=0.2, s_d1_cond=2, s_d2_cond=2, k=3,
+                C_mu=rep(0, 3), C_cov=0.1, C_var=1,
                 d1_beta=c(0.5, 1, 0), d2_beta=c(0, 0.3, 0.75), seed=06112020)
 D <- sim_dt$D
 C <- sim_dt$C
@@ -93,11 +93,11 @@ Y <- X%*%alpha + rnorm(200, sd=sd_Y)
 
 With the data generated, we can now use our primary function `mvGPS()` to estimate weights. These weights are constructed such that the numerator is equal to the marginal density, with the denominator corresponding to the conditional density, i.e., the multivariate generalized propensity score.
 
-<img src="https://latex.codecogs.com/gif.latex?w=\frac{f(\mathbf{D})}{f(\mathbf{D}\mid\mathbf{C})}" title="w=\frac{f(\mathbf{D})}{f(\mathbf{D}\mid\mathbf{C})}" />
+`w = f(D)/f(D|C)`
 
 In our case since the bivariate exposure is assumed to be bivariate normal, we can break both the numerator and denominator into full conditional densities knowing that each univariate conditional expression will remain normally distributed.
 
-<img src="https://latex.codecogs.com/gif.latex?w=\frac{f(D_2\mid&space;D_1)f(D_1)}{f(D_2\mid&space;D_1,&space;C_2,&space;C_3)f(D_1\mid&space;C_1,&space;C_2)}" title="w=\frac{f(D_2\mid D_1)f(D_1)}{f(D_2\mid D_1, C_2, C_3)f(D_1\mid C_1, C_2)}" />
+`w = f(D2|D1)f(D1)/f(D2|D1,C2,C3)f(D1|C1,C2)`
 
 Notice in the equation above, we are also able to specify the confounding set for each exposure separately.
 
@@ -117,21 +117,21 @@ Below we use the function `bal()` to specify a set of potential models to use fo
 ```{r balance_summary, warning=FALSE, message=FALSE}
 require(knitr)
 bal_results <- bal(model_list=c("mvGPS", "entropy", "CBPS", "PS", "GBM"), D, C=list(C[, 1:2], C[, 2:3]))
-bal_summary <- bal_results$bal_metrics 
+bal_summary <- bal_results$bal_metrics
 #contains overall summary statistics with respect to balance
 bal_summary <-data.frame(bal_summary, ESS=c(bal_results$ess, nrow(D)))
 #adding in ESS with last value representing the unweighted case
 bal_summary <- bal_summary[order(bal_summary$max_cor), ]
 
-kable(bal_summary[, c("euc_dist", "max_cor", "avg_cor", "ESS", "method")], 
-      digits=4, row.names=FALSE, 
-      col.names=c("Euc. Distance", "Max. Abs. Corr.", 
+kable(bal_summary[, c("euc_dist", "max_cor", "avg_cor", "ESS", "method")],
+      digits=4, row.names=FALSE,
+      col.names=c("Euc. Distance", "Max. Abs. Corr.",
                   "Avg. Abs. Corr.", "ESS", "Method"))
 ```
 
 We can see that our method `mvGPS` achieves the best balance across both exposure dimensions.
 In this case we can also note that the effective sample size after weighting
-`r round(bal_summary$ESS[bal_summary$method=="mvGPS"], 4)` is still sufficiently 
+`r round(bal_summary$ESS[bal_summary$method=="mvGPS"], 4)` is still sufficiently
 large that we not worried about loss of power.
 
 ### Bias Reduction
@@ -145,7 +145,7 @@ mvGPS_hat <- coef(mvGPS_mod)[c("D1", "D2")]
 unadj_hat <- coef(lm(Y ~ D1 + D2, data=dt))[c("D1", "D2")]
 
 bias_tbl <- cbind(truth=c(1, 1), unadj=unadj_hat, mvGPS_hat)
-kable(bias_tbl, digits=2, row.names=TRUE, 
+kable(bias_tbl, digits=2, row.names=TRUE,
              col.names=c("Truth", "Unadjusted", "mvGPS"))
 ```
 
@@ -154,19 +154,19 @@ To compare the total reduction at bias we look at the total absolute bias where 
 ### Defining Estimable Region
 
 An important consideration when using propensity scores to estimate causal effects
-are the three key identifying assumptions: 
+are the three key identifying assumptions:
 
 1. weak ignorability, aka, unconfoundedness, aka, selection on observables
 1. stable unit treatment value (SUTVA)
 1. positivity
 
-*Weak ignorability* assumes that the exposure is conditionally independent of the 
+*Weak ignorability* assumes that the exposure is conditionally independent of the
 potential outcomes given the appropriate set of confounders. Checking balance as
 shown above is one of the key diagnostics to determining the legitimacy of this
-assumption in practice. 
+assumption in practice.
 
-*SUTVA* states that the potential outcome of each unit does not depend on the exposure 
-that other units receive and that there exists only one version of each exposure. It 
+*SUTVA* states that the potential outcome of each unit does not depend on the exposure
+that other units receive and that there exists only one version of each exposure. It
 is generally an untestable assumption, but is key to ensuring that the potential outcomes
 are well-defined and that the observed outcome given the observed exposure corresponds
 to the true potential outcome.
@@ -174,14 +174,14 @@ to the true potential outcome.
 The final identifying assumption, *positivity*, is our focus when defining estimable
 regions for multivariate exposure. Positivity posits that all units have the potential
 to receive a particular level of exposure given any value of the confounders. The upshot
-of this is that we need to take care when defining the domain of our exposure when 
+of this is that we need to take care when defining the domain of our exposure when
 estimating the mvGPS.
 
 Typically in the case of univariate continuous exposure, we often ensure positivity
 by restricting the domain to the observed range of exposure or a trimmed version.
 A logical extension to the multivariate exposure would be to define our domain as
 the product of the range of each exposure. However, when the exposures of interest
-are correlated this domain may not be appropriate. Recall that in our simulated 
+are correlated this domain may not be appropriate. Recall that in our simulated
 data the marginal correlation of D<sub>1</sub> and D<sub>2</sub> is `r round(cor(D)[1, 2], 2)`.
 
 Instead, we propose to ensure positivity with multivariate exposures by defining
@@ -196,20 +196,21 @@ or convex hull as shown below.
 
 ```{r chull_plot, warning=FALSE, message=FALSE, fig.align="center", out.width="50%", cache=TRUE}
 require(sp)
-chull_D <- hull_sample(D) 
+require(ggplot2)
+chull_D <- hull_sample(D)
 #generate convex hull of exposure
 chull_D_trim <- hull_sample(D, trim_hull=TRUE, trim_quantile=0.95)
 #generate trimmed convex hull
 
 bbox_grid <- sp::bbox(chull_D$hpts_vs) #bounding box over convex hull
-bbox_df <- data.frame(D1=c(bbox_grid[1, 1], bbox_grid[1, 2], 
-                           bbox_grid[1, 2], bbox_grid[1, 1]), 
-                      D2=c(bbox_grid[2, 1], bbox_grid[2, 1], 
+bbox_df <- data.frame(D1=c(bbox_grid[1, 1], bbox_grid[1, 2],
+                           bbox_grid[1, 2], bbox_grid[1, 1]),
+                      D2=c(bbox_grid[2, 1], bbox_grid[2, 1],
                            bbox_grid[2, 2], bbox_grid[2, 2]))
 bbox_grid_trim <- sp::bbox(chull_D_trim$hpts_vs) #bounding box over trimmed convex hull
 bbox_df_trim <- data.frame(D1=c(bbox_grid_trim[1, 1], bbox_grid_trim[1, 2],
-                                bbox_grid_trim[1, 2], bbox_grid_trim[1, 1]), 
-                           D2=c(bbox_grid_trim[2, 1], bbox_grid_trim[2, 1], 
+                                bbox_grid_trim[1, 2], bbox_grid_trim[1, 1]),
+                           D2=c(bbox_grid_trim[2, 1], bbox_grid_trim[2, 1],
                                 bbox_grid_trim[2, 2], bbox_grid_trim[2, 2]))
 chull_plot <- ggplot(data=data.frame(D), aes(x=D1, D2))+
     geom_point()+
@@ -225,9 +226,9 @@ chull_plot
 
 In dark red we have the observed convex hull and in light red we have the trimmed
 convex hull at the 95th percentile. In dark blue we have the observed product range
-and in light blue we have the trimmed product range at the 95th percentile. 
+and in light blue we have the trimmed product range at the 95th percentile.
 
-Notice that by trimming we are further restricting our domains to high density 
+Notice that by trimming we are further restricting our domains to high density
 regions of the exposure. We can also see that by restricting to the convex hull we are
 avoiding areas with sparse data that are included in the product range domain.
 
@@ -235,7 +236,7 @@ avoiding areas with sparse data that are included in the product range domain.
 
 When exposure is bivariate, the resulting dose-response function is a surface.
 Using the weighted regression model described above to incorporate the weights,
-we can predict across our convex hull domain to gain intuition about 
+we can predict across our convex hull domain to gain intuition about
 how altering the exposures effects the outcome of interest. To see an example
 of this type of dose-response surface on an application to analyzing obesity
 intervention programs in Los Angeles County visit https://williazo.github.io/resources/.

@@ -69,8 +69,8 @@ exposure we can use the function `gen_D()` as shown below.
 
 ``` r
 require(mvGPS)
-sim_dt <- gen_D(method="u", n=200, rho_cond=0.2, s_d1_cond=2, s_d2_cond=2, k=3, 
-                C_mu=rep(0, 3), C_cov=0.1, C_var=1, 
+sim_dt <- gen_D(method="u", n=200, rho_cond=0.2, s_d1_cond=2, s_d2_cond=2, k=3,
+                C_mu=rep(0, 3), C_cov=0.1, C_var=1,
                 d1_beta=c(0.5, 1, 0), d2_beta=c(0, 0.3, 0.75), seed=06112020)
 D <- sim_dt$D
 C <- sim_dt$C
@@ -107,14 +107,16 @@ numerator is equal to the marginal density, with the denominator
 corresponding to the conditional density, i.e., the multivariate
 generalized propensity score.
 
-<img src="https://latex.codecogs.com/gif.latex?w=\frac{f(\mathbf{D})}{f(\mathbf{D}\mid\mathbf{C})}" title="w=\frac{f(\mathbf{D})}{f(\mathbf{D}\mid\mathbf{C})}" />
+![weight equation
+generic](https://latex.codecogs.com/png.latex?%5Cinline%20w%3D%5Cfrac%7Bf%28%5Cmathbf%7BD%7D%29%7D%7Bf%28%5Cmathbf%7BD%7D%5Cmid%5Cmathbf%7BC%7D%29%7D)
 
 In our case since the bivariate exposure is assumed to be bivariate
 normal, we can break both the numerator and denominator into full
 conditional densities knowing that each univariate conditional
 expression will remain normally distributed.
 
-<img src="https://latex.codecogs.com/gif.latex?w=\frac{f(D_2\mid&space;D_1)f(D_1)}{f(D_2\mid&space;D_1,&space;C_2,&space;C_3)f(D_1\mid&space;C_1,&space;C_2)}" title="w=\frac{f(D_2\mid D_1)f(D_1)}{f(D_2\mid D_1, C_2, C_3)f(D_1\mid C_1, C_2)}" />
+![weight equation bivariate
+normal](https://latex.codecogs.com/png.latex?%5Cinline%20w%3D%5Cfrac%7Bf%28D_2%7CD_1%29f%28D_1%29%7D%7Bf%28D_2%7CD_1%2CC_2%2CC_3%29f%28D_1%7CC_1%2CC_2%29%7D)
 
 Notice in the equation above, we are also able to specify the
 confounding set for each exposure separately.
@@ -145,15 +147,15 @@ separately so that weights are generated for both exposures.
 ``` r
 require(knitr)
 bal_results <- bal(model_list=c("mvGPS", "entropy", "CBPS", "PS", "GBM"), D, C=list(C[, 1:2], C[, 2:3]))
-bal_summary <- bal_results$bal_metrics 
+bal_summary <- bal_results$bal_metrics
 #contains overall summary statistics with respect to balance
 bal_summary <-data.frame(bal_summary, ESS=c(bal_results$ess, nrow(D)))
 #adding in ESS with last value representing the unweighted case
 bal_summary <- bal_summary[order(bal_summary$max_cor), ]
 
-kable(bal_summary[, c("euc_dist", "max_cor", "avg_cor", "ESS", "method")], 
-      digits=4, row.names=FALSE, 
-      col.names=c("Euc. Distance", "Max. Abs. Corr.", 
+kable(bal_summary[, c("euc_dist", "max_cor", "avg_cor", "ESS", "method")],
+      digits=4, row.names=FALSE,
+      col.names=c("Euc. Distance", "Max. Abs. Corr.",
                   "Avg. Abs. Corr.", "ESS", "Method"))
 ```
 
@@ -561,7 +563,7 @@ mvGPS_hat <- coef(mvGPS_mod)[c("D1", "D2")]
 unadj_hat <- coef(lm(Y ~ D1 + D2, data=dt))[c("D1", "D2")]
 
 bias_tbl <- cbind(truth=c(1, 1), unadj=unadj_hat, mvGPS_hat)
-kable(bias_tbl, digits=2, row.names=TRUE, 
+kable(bias_tbl, digits=2, row.names=TRUE,
              col.names=c("Truth", "Unadjusted", "mvGPS"))
 ```
 
@@ -716,20 +718,20 @@ ranges or convex hull as shown below.
 
 ``` r
 require(sp)
-chull_D <- hull_sample(D) 
+chull_D <- hull_sample(D)
 #generate convex hull of exposure
 chull_D_trim <- hull_sample(D, trim_hull=TRUE, trim_quantile=0.95)
 #generate trimmed convex hull
 
 bbox_grid <- sp::bbox(chull_D$hpts_vs) #bounding box over convex hull
-bbox_df <- data.frame(D1=c(bbox_grid[1, 1], bbox_grid[1, 2], 
-                           bbox_grid[1, 2], bbox_grid[1, 1]), 
-                      D2=c(bbox_grid[2, 1], bbox_grid[2, 1], 
+bbox_df <- data.frame(D1=c(bbox_grid[1, 1], bbox_grid[1, 2],
+                           bbox_grid[1, 2], bbox_grid[1, 1]),
+                      D2=c(bbox_grid[2, 1], bbox_grid[2, 1],
                            bbox_grid[2, 2], bbox_grid[2, 2]))
 bbox_grid_trim <- sp::bbox(chull_D_trim$hpts_vs) #bounding box over trimmed convex hull
 bbox_df_trim <- data.frame(D1=c(bbox_grid_trim[1, 1], bbox_grid_trim[1, 2],
-                                bbox_grid_trim[1, 2], bbox_grid_trim[1, 1]), 
-                           D2=c(bbox_grid_trim[2, 1], bbox_grid_trim[2, 1], 
+                                bbox_grid_trim[1, 2], bbox_grid_trim[1, 1]),
+                           D2=c(bbox_grid_trim[2, 1], bbox_grid_trim[2, 1],
                                 bbox_grid_trim[2, 2], bbox_grid_trim[2, 2]))
 chull_plot <- ggplot(data=data.frame(D), aes(x=D1, D2))+
     geom_point()+

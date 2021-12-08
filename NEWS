@@ -1,3 +1,6 @@
+version 1.2.2 (2021-12-05)
+  + Remove hyperlink LaTex equations from README to prevent errors
+
 version 1.2.1 (2021-10-16)
   + Update DESCRIPTION to fix windows build errors
 
